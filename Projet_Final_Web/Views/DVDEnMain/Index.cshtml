@@ -1,0 +1,61 @@
+﻿@model Projet_Final_Web.ViewModel.DVDEnMainViewModel
+@inject Microsoft.AspNetCore.Identity.UserManager<Utilisateurs> UserManager
+
+@{
+    ViewData["Title"] = "DVD";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int pagePrecedent = Model.page - 1;
+    int pageSuivant = Model.page + 1;
+}
+
+<div class="col-12">
+    <div class="row">
+        <div class="col-12 text-center">
+            <br />
+        </div>
+        @foreach (var item in Model.listDVD)
+        {
+            String ImagePochettPath = @item.Item1.ImagePochette != null ? "/Images/" + @item.Item1.ImagePochette : "/Images/default.png";
+            Utilisateurs utilisateurAyantDVDEnMain = (await UserManager.FindByIdAsync(item.Item2.ToString()));
+            <div class="col-sm-12 col-md-6 col-lg-4 mb-5">
+                <div class="card mx-auto" style="width: 15rem;">
+                    <img class="card-img-top" src="@ImagePochettPath" alt="Card image cap" height="270">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            @Html.DisplayFor(modelItem => item.Item1.TitreFrancais)
+                        </h5>
+                        <hr />
+                        <div class="text-center justify-content-center row">
+                            <a asp-controller="Films" asp-action="Details" asp-route-id="@item.Item1.NoFilm" class="btn btn-info col-11" role="button">Détail</a>
+                            <a asp-controller="Films" asp-action="Edit" asp-route-id="@item.Item1.NoFilm" class="btn btn-primary col-11 my-1" role="button">Modifier</a>
+                            <a asp-controller="Films" asp-action="Delete" asp-route-id="@item.Item1.NoFilm" class="btn btn-danger col-11" role="button">Supprimer</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <ul class="pagination justify-content-center">
+        @if (pagePrecedent > 0)
+        {
+            <li class="page-item"><a class="page-link" href="/DVD/Index?page=@pagePrecedent">Précédent</a></li>
+        }
+        @for (int i = 1; i <= Model.nbPage; i++)
+        {
+            if (i == Model.page)
+            {
+                <li class="page-item active"><a class="page-link" href="/DVDEnMain/Index?page=@i">@i</a></li>
+            }
+            else
+            {
+                <li class="page-item"><a class="page-link" href="/DVDEnMain/Index?page=@i">@i</a></li>
+            }
+        }
+        @if (pageSuivant <= Model.nbPage)
+        {
+            <li class="page-item"><a class="page-link" href="/DVDEnMain/Index?page=@pageSuivant">Suivant</a></li>
+        }
+    </ul>
+</div>
+<a href="#" class="btn btn-info" role="button" style="position: fixed; bottom: 10px; right: 10px; width: 60px; height: 60px; padding: 10px 16px; font-size: 24px; line-height: 1.33; border-radius: 35px; ">+</a>

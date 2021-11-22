@@ -1,0 +1,51 @@
+[
+ {
+   "NoUtilisateur": 1,
+   "NomUtilisateur": "admin",
+   "Courriel": "m.airouche@cgodin.qc.ca",
+   "MotPasse": 99999,
+   "TypeUtilisateur": "A"
+ },
+ {
+   "NoUtilisateur": 2,
+   "NomUtilisateur": "helene",
+   "Courriel": "helene@gmail.com",
+   "MotPasse": 11111,
+   "TypeUtilisateur": "S"
+ },
+ {
+   "NoUtilisateur": 3,
+   "NomUtilisateur": "lucille",
+   "Courriel": "lucille@gmail.com",
+   "MotPasse": 22222,
+   "TypeUtilisateur": "U"
+ },
+ {
+   "NoUtilisateur": 4,
+   "NomUtilisateur": "louis.marie",
+   "Courriel": "louis@gmail.com",
+   "MotPasse": 33333,
+   "TypeUtilisateur": "U"
+ },
+ {
+   "NoUtilisateur": 5,
+   "NomUtilisateur": "rejean",
+   "Courriel": "rejean@gmail.com",
+   "MotPasse": 44444,
+   "TypeUtilisateur": "U"
+ },
+ {
+   "NoUtilisateur": 6,
+   "NomUtilisateur": "christian",
+   "Courriel": "christian@gmail.com",
+   "MotPasse": 55555,
+   "TypeUtilisateur": "U"
+ },
+ {
+   "NoUtilisateur": 7,
+   "NomUtilisateur": "jose",
+   "Courriel": "jose@gmail.com",
+   "MotPasse": 66666,
+   "TypeUtilisateur": "U"
+ }
+]
