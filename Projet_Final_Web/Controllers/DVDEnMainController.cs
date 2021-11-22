@@ -66,7 +66,7 @@ namespace Projet_Final_Web.Controllers
         private async Task<IEnumerable<Films>> getDVD(int page)
         {
             int DVDParPage = await getDVDParPage();
-            return await _context.Films.Where(v => v.NoUtilisateurMAJ == UtilisateurActuel.Id).Skip(DVDParPage * (page - 1)).Take(DVDParPage).ToListAsync();
+            return await _context.Films.Where(v => v.NoUtilisateurMAJ == UtilisateurActuel.Id).Skip(DVDParPage * (page - 1)).Take(DVDParPage).OrderBy(v => v.TitreFrancais).ToListAsync();
         }
 
         [NonAction]
