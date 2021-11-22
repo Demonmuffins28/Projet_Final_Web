@@ -14,7 +14,7 @@ namespace Projet_Final_Web.ViewModel
 
         public int nbPage { get; set; }
 
-        public string DVDFiltreSelectionner { get; set; }
+        public string TitreRechercher { get; set; }
 
         public Utilisateurs utilisateursActuel { get; set; }
     }

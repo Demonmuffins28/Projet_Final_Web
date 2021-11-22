@@ -15,8 +15,8 @@ namespace Projet_Final_Web.Controllers
         private readonly DbContextProjetFinal _context;
         private readonly SignInManager<Utilisateurs> _signInManager;
         private readonly UserManager<Utilisateurs> _userManager;
-        private Utilisateurs UtilisateurActuel;
-        private DVDViewModel model;
+        private static Utilisateurs UtilisateurActuel;
+        private static DVDViewModel model;
 
         public DVDController(DbContextProjetFinal context, SignInManager<Utilisateurs> signInManager, UserManager<Utilisateurs> userManager)
         {
@@ -47,9 +47,14 @@ namespace Projet_Final_Web.Controllers
         }
 
         [HttpPost]
-        public IActionResult Index(string DVDFiltreSelectionner)
+        public async Task<IActionResult> Index(DVDViewModel DVDModel)
         {
-            return View();
+            model.TitreRechercher = DVDModel.TitreRechercher;
+            int nbDVDTotal = (await _context.Films.ToListAsync()).Count;
+            int DVDParPage = await getDVDParPage();
+            model.nbPage = (nbDVDTotal + DVDParPage - 1) / DVDParPage;
+
+            return RedirectToAction(nameof(Index));
         }
 
         [NonAction]
@@ -63,7 +68,12 @@ namespace Projet_Final_Web.Controllers
         private async Task<IEnumerable<Films>> getDVD(int page)
         {
             int DVDParPage = await getDVDParPage();
-            return await _context.Films.Skip(DVDParPage * (page-1)).Take(DVDParPage).ToListAsync();
+            return model.TitreRechercher == "" ?
+            await _context.Films.Skip(DVDParPage * (page-1)).Take(DVDParPage).ToListAsync() :
+            await _context.Films
+            .Where(a => a.TitreFrancais.Contains(model.TitreRechercher) || a.TitreOriginal.Contains(model.TitreRechercher))
+            .Skip(DVDParPage * (page - 1)).Take(DVDParPage)
+            .ToListAsync();
         }
 
         [NonAction]
@@ -75,7 +85,8 @@ namespace Projet_Final_Web.Controllers
             model = new DVDViewModel
             {
                 nbPage = (nbDVDTotal + DVDParPage - 1) / DVDParPage,
-                utilisateursActuel = UtilisateurActuel
+                utilisateursActuel = UtilisateurActuel,
+                TitreRechercher = ""
             };
             await changerPage(page);
         }
