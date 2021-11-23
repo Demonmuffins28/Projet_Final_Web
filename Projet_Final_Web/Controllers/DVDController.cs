@@ -15,7 +15,6 @@ namespace Projet_Final_Web.Controllers
         private readonly DbContextProjetFinal _context;
         private readonly SignInManager<Utilisateurs> _signInManager;
         private readonly UserManager<Utilisateurs> _userManager;
-        private static Utilisateurs UtilisateurActuel;
         private static DVDViewModel model;
 
         public DVDController(DbContextProjetFinal context, SignInManager<Utilisateurs> signInManager, UserManager<Utilisateurs> userManager)
@@ -31,15 +30,15 @@ namespace Projet_Final_Web.Controllers
             if (!_signInManager.IsSignedIn(User))
                 return RedirectToAction("Login", "Account");
 
-            if (UtilisateurActuel == null)
-                UtilisateurActuel = await _userManager.GetUserAsync(HttpContext.User);
-
             if (model == null)
             {
                 await initialiserModel(page);
             }
             else
             {
+                model.utilisateursActuel = await _userManager.GetUserAsync(HttpContext.User);
+                model.TitreRechercher = "";
+                await compterNombrePage();
                 await changerPage(page);
             }
 
@@ -50,45 +49,56 @@ namespace Projet_Final_Web.Controllers
         public async Task<IActionResult> Index(DVDViewModel DVDModel)
         {
             model.TitreRechercher = DVDModel.TitreRechercher;
-            int nbDVDTotal = (await _context.Films.ToListAsync()).Count;
-            int DVDParPage = await getDVDParPage();
-            model.nbPage = (nbDVDTotal + DVDParPage - 1) / DVDParPage;
+            await compterNombrePage();
+            await changerPage(1);
+            model.utilisateursActuel = await _userManager.GetUserAsync(HttpContext.User);
+            return View(model);
+        }
 
-            return RedirectToAction(nameof(Index));
+
+
+
+
+
+        [NonAction]
+        private async Task<int> getNbDVDParPage()
+        {
+            bool aPreferenceDVDParPage = await _context.ValeursPreferences.Where(v => v.NoUtilisateur == model.utilisateursActuel.Id && v.NoPreference == 7).FirstOrDefaultAsync() != null;
+            return aPreferenceDVDParPage ? Convert.ToInt32((await _context.ValeursPreferences.Where(v => v.NoUtilisateur == model.utilisateursActuel.Id && v.NoPreference == 7).FirstOrDefaultAsync()).Valeur) : 12;
         }
 
         [NonAction]
-        private async Task<int> getDVDParPage()
+        private async Task<IEnumerable<Films>> getDVDParPage(int page)
         {
-            bool aPreferenceDVDParPage = await _context.ValeursPreferences.Where(v => v.NoUtilisateur == UtilisateurActuel.Id && v.NoPreference == 7).FirstOrDefaultAsync() != null;
-            return aPreferenceDVDParPage ? Convert.ToInt32((await _context.ValeursPreferences.Where(v => v.NoUtilisateur == UtilisateurActuel.Id && v.NoPreference == 7).FirstOrDefaultAsync()).Valeur) : 12;
+            int nbDVDParPage = await getNbDVDParPage();
+            return (await getDVD()).Skip(nbDVDParPage * (page - 1)).Take(nbDVDParPage);
         }
 
         [NonAction]
-        private async Task<IEnumerable<Films>> getDVD(int page)
+        private async Task<List<Films>> getDVD()
         {
-            int DVDParPage = await getDVDParPage();
-            return model.TitreRechercher == "" ?
-            await _context.Films.Skip(DVDParPage * (page-1)).Take(DVDParPage).ToListAsync() :
-            await _context.Films
-            .Where(a => a.TitreFrancais.Contains(model.TitreRechercher) || a.TitreOriginal.Contains(model.TitreRechercher))
-            .Skip(DVDParPage * (page - 1)).Take(DVDParPage)
-            .ToListAsync();
+            return model.TitreRechercher == null ?
+            await _context.Films.ToListAsync() : await _context.Films.Where(a => a.TitreFrancais.Contains(model.TitreRechercher) || a.TitreOriginal.Contains(model.TitreRechercher)).ToListAsync();
         }
 
         [NonAction]
         private async Task initialiserModel(int page)
         {
             int nbDVDTotal = (await _context.Films.ToListAsync()).Count;
-            int DVDParPage = await getDVDParPage();
 
-            model = new DVDViewModel
-            {
-                nbPage = (nbDVDTotal + DVDParPage - 1) / DVDParPage,
-                utilisateursActuel = UtilisateurActuel,
-                TitreRechercher = ""
-            };
+            model = new DVDViewModel();
+            model.utilisateursActuel = await _userManager.GetUserAsync(HttpContext.User);
+            await compterNombrePage();
+            model.TitreRechercher = "";
+            
             await changerPage(page);
+        }
+
+        [NonAction]
+        private async Task compterNombrePage()
+        {
+            int DVDParPage = await getNbDVDParPage();
+            model.nbPage = ((await getDVD()).Count() + DVDParPage - 1) / DVDParPage;
         }
 
         [NonAction]
@@ -96,7 +106,7 @@ namespace Projet_Final_Web.Controllers
         {
             model.listDVD = new List<Tuple<Films, int>>();
 
-            foreach (Films DVD in await getDVD(page))
+            foreach (Films DVD in await getDVDParPage(page))
             {
                 model.listDVD.Add(new Tuple<Films, int> (DVD, await getIdUtilisateurDVDEnMain(DVD)));
             }
