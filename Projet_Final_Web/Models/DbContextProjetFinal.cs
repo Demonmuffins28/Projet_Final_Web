@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Projet_Final_Web.ViewModel;
 
 namespace Projet_Final_Web.Models
 {
@@ -51,6 +52,7 @@ namespace Projet_Final_Web.Models
         public DbSet<FilmsLangues> FilmsLangues { get; set; }
         public DbSet<FilmsSousTitres> FilmsSousTitres { get; set; }
         public DbSet<FilmsSupplements> FilmsSupplements { get; set; }
+        public DbSet<Projet_Final_Web.ViewModel.UtilisateurViewModel> UtilisateurViewModel { get; set; }
 
 
     }

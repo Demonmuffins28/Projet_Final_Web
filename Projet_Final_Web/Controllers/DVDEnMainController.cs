@@ -27,7 +27,8 @@ namespace Projet_Final_Web.Controllers
             _userManager = userManager;
         }
 
-        public async Task<IActionResult> Index(int page = 1)
+
+        public async Task<IActionResult> Index(int? id, int page = 1)
         {
             if (!_signInManager.IsSignedIn(User))
                 return RedirectToAction("Login", "Account");
@@ -37,11 +38,11 @@ namespace Projet_Final_Web.Controllers
 
             if (model == null)
             {
-                await initialiserModel(page);
+                await initialiserModel(id.ToString(), page);
             }
             else
             {
-                await changerPage(page);
+                await changerPage(id.ToString(), page);
             }
 
             return View(model);
@@ -63,14 +64,14 @@ namespace Projet_Final_Web.Controllers
 
         [NonAction]
         // Quels DVDs afficher
-        private async Task<IEnumerable<Films>> getDVD(int page)
+        private async Task<IEnumerable<Films>> getDVD(string utilisateurID, int page)
         {
             int DVDParPage = await getDVDParPage();
-            return await _context.Films.Where(v => v.NoUtilisateurMAJ == UtilisateurActuel.Id).Skip(DVDParPage * (page - 1)).Take(DVDParPage).OrderBy(v => v.TitreFrancais).ToListAsync();
+            return await _context.Films.Where(v => v.NoUtilisateurMAJ == utilisateurID).Skip(DVDParPage * (page - 1)).Take(DVDParPage).OrderBy(v => v.TitreFrancais).ToListAsync();
         }
 
         [NonAction]
-        private async Task initialiserModel(int page)
+        private async Task initialiserModel(string utilisateurID, int page)
         {
             int nbDVDTotal = (await _context.Films.Where(v => v.NoUtilisateurMAJ == UtilisateurActuel.Id).ToListAsync()).Count;
             int DVDParPage = await getDVDParPage();
@@ -80,15 +81,15 @@ namespace Projet_Final_Web.Controllers
                 nbPage = (nbDVDTotal + DVDParPage - 1) / DVDParPage,
                 utilisateursActuel = UtilisateurActuel
             };
-            await changerPage(page);
+            await changerPage(utilisateurID, page);
         }
 
         [NonAction]
-        private async Task changerPage(int page)
+        private async Task changerPage(string utilisateurID, int page)
         {
             model.listDVD = new List<Tuple<Films, int>>();
 
-            foreach (Films DVD in await getDVD(page))
+            foreach (Films DVD in await getDVD(utilisateurID, page))
             {
                 model.listDVD.Add(new Tuple<Films, int>(DVD, await getIdUtilisateurDVDEnMain(DVD)));
             }
