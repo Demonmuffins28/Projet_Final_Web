@@ -105,7 +105,7 @@ namespace Projet_Final_Web.Controllers
                                select unFilm).ToList();
                     break;
             }
-
+            int x = 3;
             return listDVD;
         }
 
