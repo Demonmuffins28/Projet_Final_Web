@@ -8,7 +8,7 @@ namespace Projet_Final_Web.ViewModel
 {
     public class DVDEnMainViewModel
     {
-        public List<Tuple<Films, int>> listDVD { get; set; }
+        public List<Films> listDVD { get; set; }
 
         public int page { get; set; }
 

@@ -1,0 +1,46 @@
+﻿@model IEnumerable<Projet_Final_Web.ViewModel.UtilisateurViewModel>
+
+@{
+    ViewData["Title"] = "Liste des emprunts";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Listes des emprunts</h1>
+
+<table class="table table-dark col-12">
+    <thead>
+        <tr>
+            <th scope="col">
+                @Html.DisplayNameFor(model => model.Prenom)
+            </th>
+            <th scope="col">
+                @Html.DisplayNameFor(model => model.Courriel)
+            </th>
+            <th scope="col">
+                @Html.DisplayNameFor(model => model.NbDVD)
+            </th>
+            <th scope="col">
+                Détails sur les emprunts
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Prenom)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Courriel)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NbDVD)
+            </td>
+            <td>
+                <a asp-controller="DVDEnMain" asp-action="Index" asp-route-id="@item.Id">Détails sur les emprunts</a>
+
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
