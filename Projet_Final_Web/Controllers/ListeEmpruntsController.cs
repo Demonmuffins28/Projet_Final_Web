@@ -39,8 +39,8 @@ namespace Projet_Final_Web.Controllers
 
             foreach (Utilisateurs u in _userManager.Users.Where(u => u.TypesUtilisateurID != "A").ToList())
             {
-                int nbDVD = _context.EmpruntsFilms.ToList().GroupBy(e => e.NoExemplaire).
-                    SelectMany(ef => ef.OrderByDescending(e => e.DateEmprunt).Take(1)).Where(e => e.NoUtilisateur == u.Id).Count();
+
+                int nbDVD = _context.Films.Where(f => f.NoUtilisateurMAJ == u.Id).Count();
 
                 UtilisateurViewModel newUser = new UtilisateurViewModel(u.Id, u.UserName, u.Email, nbDVD);
                 tempList.Add(newUser);

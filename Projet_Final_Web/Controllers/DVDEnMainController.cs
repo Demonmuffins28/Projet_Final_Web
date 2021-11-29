@@ -56,18 +56,17 @@ namespace Projet_Final_Web.Controllers
 
         [NonAction]
         // Combien de DVD afficher par page
-        private async Task<int> getDVDParPage()
+        private async Task<int> getNbDVDParPage()
         {
-            return 99;
-            //bool aPreferenceDVDParPage = await _context.ValeursPreferences.Where(v => v.NoUtilisateur == UtilisateurActuel.Id && v.NoPreference == 7).FirstOrDefaultAsync() != null;
-            //return aPreferenceDVDParPage ? Convert.ToInt32((await _context.ValeursPreferences.Where(v => v.NoUtilisateur == UtilisateurActuel.Id && v.NoPreference == 7).FirstOrDefaultAsync()).Valeur) : 12;
+            bool aPreferenceDVDParPage = await _context.ValeursPreferences.Where(v => v.NoUtilisateur == UtilisateurActuel.Id && v.NoPreference == 7).FirstOrDefaultAsync() != null;
+            return aPreferenceDVDParPage ? Convert.ToInt32((await _context.ValeursPreferences.Where(v => v.NoUtilisateur == UtilisateurActuel.Id && v.NoPreference == 7).FirstOrDefaultAsync()).Valeur) : 12;
         }
 
         [NonAction]
         // Quels DVDs afficher
-        private async Task<IEnumerable<Films>> getDVD(string utilisateurID, int page)
+        private async Task<List<Films>> getDVD(string utilisateurID, int page)
         {
-            int DVDParPage = await getDVDParPage();
+            int DVDParPage = await getNbDVDParPage();
             return await _context.Films.Where(v => v.NoUtilisateurMAJ == utilisateurID).Skip(DVDParPage * (page - 1)).Take(DVDParPage).OrderBy(v => v.TitreFrancais).ToListAsync();
         }
 
@@ -75,12 +74,12 @@ namespace Projet_Final_Web.Controllers
         private async Task initialiserModel(string utilisateurID, int page)
         {
             int nbDVDTotal = (await _context.Films.Where(v => v.NoUtilisateurMAJ == utilisateurID).ToListAsync()).Count;
-            int DVDParPage = await getDVDParPage();
+            int DVDParPage = await getNbDVDParPage();
 
             model = new DVDEnMainViewModel
             {
                 nbPage = (nbDVDTotal + DVDParPage - 1) / DVDParPage,
-                //utilisateursActuel = UtilisateurActuel
+                utilisateursActuel = UtilisateurActuel
             };
             await changerPage(utilisateurID, page);
         }
@@ -88,27 +87,9 @@ namespace Projet_Final_Web.Controllers
         [NonAction]
         private async Task changerPage(string utilisateurID, int page)
         {
-            model.listDVD = new List<Tuple<Films, int>>();
-
-            foreach (Films DVD in await getDVD(utilisateurID, page))
-            {
-                model.listDVD.Add(new Tuple<Films, int>(DVD, await getIdUtilisateurDVDEnMain(DVD)));
-            }
+            model.listDVD = await getDVD(utilisateurID, page);
 
             model.page = page;
-        }
-
-        [NonAction]
-        private async Task<int> getIdUtilisateurDVDEnMain(Films DVD)
-        {
-            return Convert.ToInt32(
-                (await
-                _context.EmpruntsFilms
-                .Where(v => v.NoExemplaire.ToString().Substring(0, v.NoExemplaire.ToString().Length - 2) == DVD.NoFilm.ToString())
-                .OrderByDescending(a => a.DateEmprunt)
-                .FirstOrDefaultAsync())
-                .NoUtilisateur
-            );
         }
 
         private bool FilmsExists(int id)
