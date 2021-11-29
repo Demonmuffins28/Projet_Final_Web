@@ -13,20 +13,22 @@
     <div class="row">
         <form asp-action="Index" class="col-12 my-4">
             <div class="form-group form-row">
-                <input type="search" asp-for="@Model.TitreRechercher" class="form-control col-md-10 col-9">
+                <input type="search" asp-for="TitreRechercher" class="form-control col-md-10 col-9">
                 <button type="submit" class="btn btn-primary col-md-2 col-3">Rechercher</button>
+                <p class="col-md-3 mt-3">Trier en ordre alphabétique de : </p>
+                <select class="col-md-9 form-control mt-3" asp-for="TrierPar" asp-items="Model.ListTrie" onchange="this.form.submit()"></select>
             </div>
         </form>
         @foreach (var item in Model.listDVD)
         {
-            String ImagePochettPath = @item.Item1.ImagePochette != null ? "/Images/" + @item.Item1.ImagePochette : "/Images/default.png";
-            Utilisateurs utilisateurAyantDVDEnMain = (await UserManager.FindByIdAsync(item.Item2.ToString()));
+            String ImagePochettPath = @item.ImagePochette != null ? "/Images/" + @item.ImagePochette : "/Images/default.png";
+            Utilisateurs utilisateurAyantDVDEnMain = (await UserManager.FindByIdAsync(item.NoUtilisateurMAJ.ToString()));
             <div class="col-sm-12 col-md-6 col-lg-4 mb-5">
                 <div class="card mx-auto" style="width: 15rem;">
                     <img class="card-img-top" src="@ImagePochettPath" alt="Card image cap" height="270">
                     <div class="card-body">
                         <h5 class="card-title">
-                            @Html.DisplayFor(modelItem => item.Item1.TitreFrancais)
+                            @Html.DisplayFor(modelItem => item.TitreFrancais)
                         </h5>
                         <ul style=" list-style-type: none; padding: 0; ">
                             <li class="card-text">
