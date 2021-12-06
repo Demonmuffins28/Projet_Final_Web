@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -15,12 +17,13 @@ namespace Projet_Final_Web.Controllers
     {
         private readonly DbContextProjetFinal _context;
         private readonly UserManager<Utilisateurs> _userManager;
+        private IWebHostEnvironment _env;
 
-
-        public FilmsController(DbContextProjetFinal context, UserManager<Utilisateurs> userManager)
+        public FilmsController(DbContextProjetFinal context, UserManager<Utilisateurs> userManager, IWebHostEnvironment env)
         {
             _context = context;
             _userManager = userManager;
+            _env = env;
         }
 
         // GET: Films
@@ -56,11 +59,6 @@ namespace Projet_Final_Web.Controllers
         // GET: Films/Create
         public IActionResult Create()
         {
-            ViewData["NoCategorie"] = new SelectList(_context.Categories, "NoCategorie", "NoCategorie");
-            ViewData["NoFormat"] = new SelectList(_context.Formats, "NoFormat", "NoFormat");
-            ViewData["NoProducteur"] = new SelectList(_context.Producteurs, "NoProducteur", "NoProducteur");
-            ViewData["NoRealisateur"] = new SelectList(_context.Realisateurs, "NoRealisateur", "NoRealisateur");
-
             ViewData["ErreurGlobal"] = "";
 
             AjoutDVDViewModel model = new AjoutDVDViewModel()
@@ -79,6 +77,8 @@ namespace Projet_Final_Web.Controllers
         public async Task<IActionResult> Create(AjoutDVDViewModel model, string btnAjouterSelectionner)
         {
             ViewData["ErreurGlobal"] = "";
+            ViewData["ErreurImageClass"] = "";
+            ViewData["ErreurPasImage"] = "";
 
             if (!string.IsNullOrEmpty(btnAjouterSelectionner)) // Verifie que le submit button a ete clicker et non le dropdown list
             {
@@ -122,20 +122,149 @@ namespace Projet_Final_Web.Controllers
                 }
                 else
                 {
-
+                    model.Film.FilmOriginal = model.FilmOriginal == "1" ? true : false;
+                    model.Film.VersionEtendue = model.VersionEtendue == "1" ? true : false;
                     if (ModelState.IsValid)
                     {
+                        if (await ValidationAjoutComplet(model))
+                        {
+                            Utilisateurs utilisateursActuel = await _userManager.GetUserAsync(HttpContext.User);
+                            DateTime dateToday = DateTime.Now;
+                            string debutNoFilm = dateToday.ToString("yyMM");
+                            int NoSeq = _context.Films.Where(f => f.NoFilm.ToString().Substring(0, 4) == debutNoFilm).Count()+1;
+                            model.Film.NoFilm = Convert.ToInt32(debutNoFilm + NoSeq.ToString("D2"));
+                            model.Film.DateMAJ = dateToday;
+                            model.Film.NoUtilisateurMAJ = utilisateursActuel.Id;    
+                            model.Film.TitreFrancais = model.Film.TitreFrancais.Trim().Substring(0, 1).ToUpper() + model.Film.TitreFrancais.Trim().Substring(1, model.Film.TitreFrancais.Trim().Length - 1);
+                            
+                            if (model.image != null)
+                            {
+                                model.Film.ImagePochette = model.Film.NoFilm + "."+ model.image.FileName.Split('.')[1].ToLower();
+                                string wwwPath = _env.WebRootPath;
+                                string path = Path.Combine(wwwPath, "images");
 
+                                string fileName = Path.GetFileName(model.Film.ImagePochette);
+                                using (FileStream stream = new FileStream(Path.Combine(path, fileName), FileMode.Create))
+                                {
+                                    model.image.CopyTo(stream);
+                                }
+                            }
+
+                            Exemplaires exemplaires = new Exemplaires()
+                            {
+                                NoExemplaire = Convert.ToInt32(model.Film.NoFilm + "01"),
+                                NoUtilisateurProprietaire = utilisateursActuel.Id
+                            };
+                            EmpruntsFilms empruntsFilms = new EmpruntsFilms()
+                            {
+                                NoExemplaire = exemplaires.NoExemplaire,
+                                NoUtilisateur = exemplaires.NoUtilisateurProprietaire,
+                                DateEmprunt = dateToday
+                            };
+                            _context.Add(model.Film);
+                            _context.Add(exemplaires);
+                            _context.Add(empruntsFilms);
+
+                            List<int> listActeursNonNull = model.DictionaryActeurs.Values.Where(t => t != -1).ToList();
+                            List<int> listLanguesNonNull = model.DictionaryLangues.Values.Where(t => t != -1).ToList();
+                            List<int> listSousTitreNonNull = model.DictionarySousTitre.Values.Where(t => t != -1).ToList();
+                            List<int> listSupplementNonNull = model.DictionarySupplements.Values.Where(t => t != -1).ToList();
+
+                            foreach (int NoActeur in listActeursNonNull)
+                            {
+                                FilmsActeurs filmsActeurs = new FilmsActeurs() 
+                                { 
+                                    NoActeur = NoActeur,
+                                    NoFilm = model.Film.NoFilm
+                                };
+                                _context.Add(filmsActeurs);
+                            }
+                            foreach (int NoLangue in listLanguesNonNull)
+                            {
+                                FilmsLangues filmsLangues = new FilmsLangues()
+                                {
+                                    NoLangue = NoLangue,
+                                    NoFilm = model.Film.NoFilm
+                                };
+                                _context.Add(filmsLangues);
+                            }
+                            foreach (int NoSousTitre in listSousTitreNonNull)
+                            {
+                                FilmsSousTitres filmsSousTitres = new FilmsSousTitres()
+                                {
+                                    NoSousTitre = NoSousTitre,
+                                    NoFilm = model.Film.NoFilm
+                                };
+                                _context.Add(filmsSousTitres);
+                            }
+                            foreach (int NoSupplement in listSupplementNonNull)
+                            {
+                                FilmsSupplements filmsSupplements = new FilmsSupplements()
+                                {
+                                    NoSupplement = NoSupplement,
+                                    NoFilm = model.Film.NoFilm
+                                };
+                                _context.Add(filmsSupplements);
+                            }
+                            await _context.SaveChangesAsync();
+                            return Redirect(model.LienRetour);
+                        }
                     }
                 }
-                ViewData["NoCategorie"] = new SelectList(_context.Categories, "NoCategorie", "NoCategorie", model.Film.NoCategorie);
-                ViewData["NoFormat"] = new SelectList(_context.Formats, "NoFormat", "NoFormat", model.Film.NoFormat);
-                ViewData["NoProducteur"] = new SelectList(_context.Producteurs, "NoProducteur", "NoProducteur", model.Film.NoProducteur);
-                ViewData["NoRealisateur"] = new SelectList(_context.Realisateurs, "NoRealisateur", "NoRealisateur", model.Film.NoRealisateur);
             }
+
+            ViewData["NoCategorie"] = new SelectList(_context.Categories, "NoCategorie", "Description", model.Film).Prepend(new SelectListItem("", null));
+            ViewData["NoFormat"] = new SelectList(_context.Formats, "NoFormat", "Description", model.Film).Prepend(new SelectListItem("", null));
+            ViewData["NoProducteur"] = new SelectList(_context.Producteurs, "NoProducteur", "Nom", model.Film).Prepend(new SelectListItem("", null));
+            ViewData["NoRealisateur"] = new SelectList(_context.Realisateurs, "NoRealisateur", "Nom", model.Film).Prepend(new SelectListItem("", null));
+            ViewData["FilmOriginal"] = new List<SelectListItem>() { new SelectListItem("Non", "0"), new SelectListItem("Oui", "1", model.Film != null ? model.FilmOriginal == "1": false) };
+            ViewData["VersionEtendue"] = new List<SelectListItem>() { new SelectListItem("Non", "0"), new SelectListItem("Oui", "1", model.Film != null ? model.VersionEtendue == "1" : false) };
+
+            ViewData["NoActeur"] = new SelectList(_context.Acteurs, "NoActeur", "Nom").Prepend(new SelectListItem("", "-1"));
+            ViewData["NoLangue"] = new SelectList(_context.Langues, "NoLangue", "Langue").Prepend(new SelectListItem("", "-1"));
+            ViewData["NoSousTitre"] = new SelectList(_context.SousTitres, "NoSousTitre", "LangueSousTitre").Prepend(new SelectListItem("", "-1"));
+            ViewData["NoSupplement"] = new SelectList(_context.Supplements, "NoSupplement", "Description").Prepend(new SelectListItem("", "-1"));
 
             return View(model);
         }
+
+        [NonAction]
+        private async Task<Boolean> ValidationAjoutComplet(AjoutDVDViewModel model)
+        {
+            bool binAAucunDoublon = true;
+            if (model.DictionaryActeurs.Values.Where(a => a != -1).ToList().Count != model.DictionaryActeurs.Values.Distinct().Where(a => a != -1).ToList().Count)
+            {
+                ViewData["ErreurGlobal"] = "Vous avez séléctionné plusieurs fois le même acteur.";
+                binAAucunDoublon = false;
+            }
+            else if (model.DictionaryLangues.Values.Where(a => a != -1).ToList().Count != model.DictionaryLangues.Values.Distinct().Where(a => a != -1).ToList().Count)
+            {
+                ViewData["ErreurGlobal"] = "Vous avez séléctionné plusieurs fois la même langues";
+                binAAucunDoublon = false;
+            }
+            else if (model.DictionarySousTitre.Values.Where(a => a != -1).ToList().Count != model.DictionarySousTitre.Values.Distinct().Where(a => a != -1).ToList().Count)
+            {
+                ViewData["ErreurGlobal"] = "Vous avez séléctionné plusieurs fois le même sous titre";
+                binAAucunDoublon = false;
+            }
+            else if (model.DictionarySupplements.Values.Where(a => a != -1).ToList().Count != model.DictionarySupplements.Values.Distinct().Where(a => a != -1).ToList().Count)
+            {
+                ViewData["ErreurGlobal"] = "Vous avez séléctionné plusieurs fois le même suppléments";
+                binAAucunDoublon = false;
+            }
+            if (model.image != null)
+            {
+                if (!new List<string>() { "png", "jpg", "jpeg" }.Contains(model.image.FileName.Split('.')[1].ToLower()))
+                {
+                    binAAucunDoublon = false;
+                    ViewData["ErreurPasImage"] = "Vous devez selectionner une image valide de format (png, jpg ou jpeg)";
+                    ViewData["ErreurImageClass"] = "is-invalid";
+                }
+            }
+
+            return binAAucunDoublon;
+        }
+
         [NonAction]
         private async Task<Boolean> TitresDVDSontValid(AjoutDVDViewModel model)
         {

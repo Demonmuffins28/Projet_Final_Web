@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Projet_Final_Web.Models;
 using System;
 using System.Collections.Generic;
@@ -25,5 +26,22 @@ namespace Projet_Final_Web.ViewModel
             {1,""},{2,""},{3,""},{4,""},{5,""},{6,""},{7,""},{8,""},{9,""},{10,""}
         };
 
+
+        public string FilmOriginal { get; set; }
+        public string VersionEtendue { get; set; }
+        public Dictionary<int, int> DictionaryLangues { get; private set; } = new Dictionary<int, int> {
+            {1,-1},{2,-1},{3,-1}
+        };
+        public Dictionary<int, int> DictionarySousTitre { get; private set; } = new Dictionary<int, int> {
+            {1,-1},{2,-1},{3,-1}
+        };
+        public Dictionary<int, int> DictionaryActeurs { get; private set; } = new Dictionary<int, int> {
+            {1,-1},{2,-1},{3,-1}
+        };
+        public Dictionary<int, int> DictionarySupplements { get; private set; } = new Dictionary<int, int> {
+            {1,-1},{2,-1},{3,-1}
+        };
+
+        public IFormFile image { get; set; }
     }
 }

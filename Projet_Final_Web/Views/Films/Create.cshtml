@@ -9,7 +9,7 @@
 <hr />
 <div class="row d-flex justify-content-center">
     <div class="col-lg-12">
-        <form asp-action="Create">
+        <form asp-action="Create" enctype="multipart/form-data">
             <div class="form-group form-inline d-flex justify-content-center">
                 <label for="TypeAjout" class="col-form-label mr-1">Type d'ajout:</label>
                 <select class="form-control" asp-for="TypeAjout" asp-items="Model.ListTypeAjout" onchange="this.form.submit()"></select>
@@ -30,6 +30,104 @@
             }
             else
             {
+                <h5 class="text-center">Vous pouvez ajouter 1 DVD</h5>
+                <h6 class="text-center text-danger">@ViewData["ErreurGlobal"]</h6>
+                <div class="form-group">
+                    <label asp-for="Film.AnneeSortie" class="control-label">Année de Sortie :</label>
+                    <input asp-for="Film.AnneeSortie" class="form-control" />
+                    <span asp-validation-for="Film.AnneeSortie" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Film.NoCategorie" class="control-label">Catégorie :</label>
+                    <select asp-for="Film.NoCategorie" class="form-control" asp-items="ViewBag.NoCategorie"></select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Film.NoFormat" class="control-label">Format :</label>
+                    <select asp-for="Film.NoFormat" class="form-control" asp-items="ViewBag.NoFormat"></select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Film.Resume" class="control-label">Résumer :</label>
+                    <input asp-for="Film.Resume" class="form-control" />
+                    <span asp-validation-for="Film.Resume" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Film.DureeMinutes" class="control-label">Durée en minutes :</label>
+                    <input asp-for="Film.DureeMinutes" class="form-control" />
+                    <span asp-validation-for="Film.DureeMinutes" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="FilmOriginal" class="control-label">Est-ce le film original ? :</label>
+                    <select asp-for="FilmOriginal" asp-items="ViewBag.FilmOriginal" class="form-control"></select>
+                    <span asp-validation-for="FilmOriginal" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Film.NbDisques" class="control-label">Nombre de disques :</label>
+                    <input asp-for="Film.NbDisques" class="form-control" />
+                    <span asp-validation-for="Film.NbDisques" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Film.TitreFrancais" class="control-label">Titre Francais :</label>
+                    <input asp-for="Film.TitreFrancais" class="form-control" />
+                    <span asp-validation-for="Film.TitreFrancais" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Film.TitreOriginal" class="control-label">Titre Original :</label>
+                    <input asp-for="Film.TitreOriginal" class="form-control" />
+                    <span asp-validation-for="Film.TitreOriginal" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="VersionEtendue" class="control-label">Est-ce la version étendue ? :</label>
+                    <select asp-for="VersionEtendue" asp-items="ViewBag.FilmOriginal" class="form-control"></select>
+                    <span asp-validation-for="VersionEtendue" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Film.NoRealisateur" class="control-label">Réalisateur :</label>
+                    <select asp-for="Film.NoRealisateur" class="form-control" asp-items="ViewBag.NoRealisateur"></select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Film.NoProducteur" class="control-label">Producteur :</label>
+                    <select asp-for="Film.NoProducteur" class="form-control" asp-items="ViewBag.NoProducteur"></select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Film.Xtra" class="control-label">Autre Informations :</label>
+                    <input asp-for="Film.Xtra" class="form-control" />
+                    <span asp-validation-for="Film.Xtra" class="text-danger"></span>
+                </div>
+                <label class="control-label">Acteurs Principal (maximum 3) :</label>
+                foreach (int key in Model.DictionaryActeurs.Keys)
+                {
+                    <div class="form-group">
+                        <select asp-for="DictionaryActeurs[key]" asp-items="ViewBag.NoActeur" class="form-control"></select>
+                    </div>
+                }
+                <label class="control-label">Langues (maximum 3) :</label>
+                foreach (int key in Model.DictionaryLangues.Keys)
+                {
+                    <div class="form-group">
+                        <select asp-for="DictionaryLangues[key]" asp-items="ViewBag.NoLangue" class="form-control"></select>
+                    </div>
+                }
+                <label class="control-label">Sous titre (maximum 3) :</label>
+                foreach (int key in Model.DictionarySousTitre.Keys)
+                {
+                    <div class="form-group">
+                        <select asp-for="DictionarySousTitre[key]" asp-items="ViewBag.NoSousTitre" class="form-control"></select>
+                    </div>
+                }
+                <label class="control-label">Supplements (maximum 3) :</label>
+                foreach (int key in Model.DictionarySupplements.Keys)
+                {
+                    <div class="form-group">
+                        <select asp-for="DictionarySupplements[key]" class="form-control" asp-items="ViewBag.NoSupplement"></select>
+                    </div>
+                }
+                <div class="form-group">
+                    <label class="col-form-label" for="idImage">Image de Pochette: </label>
+                    <input type="file" class="form-control @ViewBag.ErreurImageClass" id="idImage" asp-for="image" accept="image/*" onchange="montrerImage(event)" />
+                    <img style="width: 400px; height: 550px; object-fit: cover;" src="~/Images/default.png" class="img-thumbnail mt-4" id="idMontrerImage">
+                    <span class="invalid-feedback text-center" id="messageInvalideImage">@ViewBag.ErreurPasImage</span>
+                </div>
+                
 
             }
             <div class="d-flex justify-content-center">
