@@ -12,6 +12,7 @@ namespace Projet_Final_Web.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int NoFilm { get; set; }
+        [Range(1750, 3000)]
         public int? AnneeSortie { get; set; }
         [ForeignKey("Categories")]
         public int? NoCategorie { get; set; }
@@ -21,13 +22,19 @@ namespace Projet_Final_Web.Models
         [ForeignKey("Utilisateurs")]
         public string NoUtilisateurMAJ { get; set; }
         [Column(TypeName = "nvarchar(500)")]
+        [MaxLength(500)]
         public string? Resume { get; set; }
+        [Range(1, 2000)]
         public int? DureeMinutes { get; set; }
         public bool? FilmOriginal { get; set; }
         [Column(TypeName = "nvarchar(50)")]
+        [MaxLength(50)]
         public string ImagePochette { get; set; }
+        [Range(1, 250)]
         public int? NbDisques { get; set; }
         [Column(TypeName = "nvarchar(50)")]
+        [MaxLength(50)]
+        [Required(ErrorMessage = "Le titre francais de DVD est obligatoire")]
         public string TitreFrancais { get; set; }
         [Column(TypeName = "nvarchar(50)")]
         public string? TitreOriginal { get; set; }

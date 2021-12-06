@@ -1,2 +1,20 @@
 ﻿<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
 <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+<script>
+    function montrerImage(event) {
+        if (event.target.files.length > 0) {
+            if (event.target.files[0]['type'].split('/')[0] === 'image') {
+                let src = URL.createObjectURL(event.target.files[0]);
+                document.getElementById('idMontrerImage').src = src;
+                document.getElementById('idImage').classList.remove('is-invalid');
+            }
+            else {
+                document.getElementById('idImage').classList.remove('is-invalid');
+                document.getElementById('idImage').classList.add('is-invalid');
+                document.getElementById('messageInvalideImage').innerHTML = "Le fichier entrer n'est pas une image";
+                document.getElementById('idMontrerImage').src = '/Images/default.png';
+                document.getElementById('idImage').value = null;
+            }
+        }
+    }
+</script>
