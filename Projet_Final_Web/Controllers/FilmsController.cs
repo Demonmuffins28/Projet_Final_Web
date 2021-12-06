@@ -123,17 +123,15 @@ namespace Projet_Final_Web.Controllers
                 else
                 {
 
-                    /*if (ModelState.IsValid)
+                    if (ModelState.IsValid)
                     {
-                        _context.Add(films);
-                        await _context.SaveChangesAsync();
-                        return RedirectToAction(nameof(Index));
+
                     }
-                    ViewData["NoCategorie"] = new SelectList(_context.Categories, "NoCategorie", "NoCategorie", films.NoCategorie);
-                    ViewData["NoFormat"] = new SelectList(_context.Formats, "NoFormat", "NoFormat", films.NoFormat);
-                    ViewData["NoProducteur"] = new SelectList(_context.Producteurs, "NoProducteur", "NoProducteur", films.NoProducteur);
-                    ViewData["NoRealisateur"] = new SelectList(_context.Realisateurs, "NoRealisateur", "NoRealisateur", films.NoRealisateur);*/
                 }
+                ViewData["NoCategorie"] = new SelectList(_context.Categories, "NoCategorie", "NoCategorie", model.Film.NoCategorie);
+                ViewData["NoFormat"] = new SelectList(_context.Formats, "NoFormat", "NoFormat", model.Film.NoFormat);
+                ViewData["NoProducteur"] = new SelectList(_context.Producteurs, "NoProducteur", "NoProducteur", model.Film.NoProducteur);
+                ViewData["NoRealisateur"] = new SelectList(_context.Realisateurs, "NoRealisateur", "NoRealisateur", model.Film.NoRealisateur);
             }
 
             return View(model);
