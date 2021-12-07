@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Projet_Final_Web.ViewModel
 {
-    public class AjoutDVDViewModel
+    public class AjoutEditDVDViewModel
     {
         public int TypeAjout { get; set; }
 

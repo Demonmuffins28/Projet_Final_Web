@@ -61,7 +61,7 @@ namespace Projet_Final_Web.Controllers
         {
             ViewData["ErreurGlobal"] = "";
 
-            AjoutDVDViewModel model = new AjoutDVDViewModel()
+            AjoutEditDVDViewModel model = new AjoutEditDVDViewModel()
             {
                 TypeAjout = 1,
                 LienRetour = Request.Headers["Referer"].ToString()
@@ -74,7 +74,7 @@ namespace Projet_Final_Web.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(AjoutDVDViewModel model, string btnAjouterSelectionner)
+        public async Task<IActionResult> Create(AjoutEditDVDViewModel model, string btnAjouterSelectionner)
         {
             ViewData["ErreurGlobal"] = "";
             ViewData["ErreurImageClass"] = "";
@@ -229,7 +229,7 @@ namespace Projet_Final_Web.Controllers
         }
 
         [NonAction]
-        private async Task<Boolean> ValidationAjoutComplet(AjoutDVDViewModel model)
+        private async Task<Boolean> ValidationAjoutComplet(AjoutEditDVDViewModel model)
         {
             bool binAAucunDoublon = true;
             if (model.DictionaryActeurs.Values.Where(a => a != -1).ToList().Count != model.DictionaryActeurs.Values.Distinct().Where(a => a != -1).ToList().Count)
@@ -266,7 +266,7 @@ namespace Projet_Final_Web.Controllers
         }
 
         [NonAction]
-        private async Task<Boolean> TitresDVDSontValid(AjoutDVDViewModel model)
+        private async Task<Boolean> TitresDVDSontValid(AjoutEditDVDViewModel model)
         {
             bool binAuMoinsUnTitreDVDNonNull = model.DictionaryNomFilm.Values.Any(t => !string.IsNullOrWhiteSpace(t));
             if (binAuMoinsUnTitreDVDNonNull)
@@ -310,12 +310,51 @@ namespace Projet_Final_Web.Controllers
             {
                 return NotFound();
             }
-            ViewData["NoCategorie"] = new SelectList(_context.Categories, "NoCategorie", "NoCategorie", films.NoCategorie);
-            ViewData["NoFormat"] = new SelectList(_context.Formats, "NoFormat", "NoFormat", films.NoFormat);
-            ViewData["NoProducteur"] = new SelectList(_context.Producteurs, "NoProducteur", "NoProducteur", films.NoProducteur);
-            ViewData["NoRealisateur"] = new SelectList(_context.Realisateurs, "NoRealisateur", "NoRealisateur", films.NoRealisateur);
-            ViewData["NoUtilisateurMAJ"] = new SelectList(_context.Users, "Id", "Id", films.NoUtilisateurMAJ);
-            return View(films);
+            ViewData["ErreurGlobal"] = "";
+
+            AjoutEditDVDViewModel model = new AjoutEditDVDViewModel()
+            {
+                LienRetour = Request.Headers["Referer"].ToString(),
+                Film = films
+            };
+
+            List<int> ListNoActeur = _context.FilmsActeurs.Where(a => a.NoFilm == films.NoFilm).Select(a => a.NoActeur).ToList();
+            List<int> ListNoLangue = _context.FilmsLangues.Where(a => a.NoFilm == films.NoFilm).Select(a => a.NoLangue).ToList();
+            List<int> ListNoSousTitre = _context.FilmsSousTitres.Where(a => a.NoFilm == films.NoFilm).Select(a => a.NoSousTitre).ToList();
+            List<int> ListNoSupplement = _context.FilmsSupplements.Where(a => a.NoFilm == films.NoFilm).Select(a => a.NoSupplement).ToList();
+
+            for (int i = 1; i <= ListNoActeur.Count; i++)
+            {
+                model.DictionaryActeurs[i] = ListNoActeur[i-1];
+            }
+
+            for (int i = 1; i <= ListNoLangue.Count; i++)
+            {
+                model.DictionaryLangues[i] = ListNoLangue[i - 1];
+            }
+
+            for (int i = 1; i <= ListNoSousTitre.Count; i++)
+            {
+                model.DictionarySousTitre[i] = ListNoSousTitre[i - 1];
+            }
+
+            for (int i = 1; i <= ListNoSupplement.Count; i++)
+            {
+                model.DictionarySupplements[i] = ListNoSupplement[i - 1];
+            }
+
+            ViewData["NoCategorie"] = new SelectList(_context.Categories, "NoCategorie", "Description", films).Prepend(new SelectListItem("", null));
+            ViewData["NoFormat"] = new SelectList(_context.Formats, "NoFormat", "Description", films).Prepend(new SelectListItem("", null));
+            ViewData["NoProducteur"] = new SelectList(_context.Producteurs, "NoProducteur", "Nom", films).Prepend(new SelectListItem("", null));
+            ViewData["NoRealisateur"] = new SelectList(_context.Realisateurs, "NoRealisateur", "Nom", films).Prepend(new SelectListItem("", null));
+            ViewData["FilmOriginal"] = new List<SelectListItem>() { new SelectListItem("Non", "0"), new SelectListItem("Oui", "1", films.FilmOriginal == true) };
+            ViewData["VersionEtendue"] = new List<SelectListItem>() { new SelectListItem("Non", "0"), new SelectListItem("Oui", "1", films.VersionEtendue == true) };
+
+            ViewData["NoActeur"] = new SelectList(_context.Acteurs, "NoActeur", "Nom").Prepend(new SelectListItem("", "-1"));
+            ViewData["NoLangue"] = new SelectList(_context.Langues, "NoLangue", "Langue").Prepend(new SelectListItem("", "-1"));
+            ViewData["NoSousTitre"] = new SelectList(_context.SousTitres, "NoSousTitre", "LangueSousTitre").Prepend(new SelectListItem("", "-1"));
+            ViewData["NoSupplement"] = new SelectList(_context.Supplements, "NoSupplement", "Description").Prepend(new SelectListItem("", "-1"));
+            return View(model);
         }
 
         // POST: Films/Edit/5
@@ -323,39 +362,9 @@ namespace Projet_Final_Web.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("NoFilm,AnneeSortie,NoCategorie,NoFormat,DateMAJ,NoUtilisateurMAJ,Resume,DureeMinutes,FilmOriginal,ImagePochette,NbDisques,TitreFrancais,TitreOriginal,VersionEtendue,NoRealisateur,NoProducteur,Xtra")] Films films)
+        public async Task<IActionResult> Edit(AjoutEditDVDViewModel model)
         {
-            if (id != films.NoFilm)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(films);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!FilmsExists(films.NoFilm))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["NoCategorie"] = new SelectList(_context.Categories, "NoCategorie", "NoCategorie", films.NoCategorie);
-            ViewData["NoFormat"] = new SelectList(_context.Formats, "NoFormat", "NoFormat", films.NoFormat);
-            ViewData["NoProducteur"] = new SelectList(_context.Producteurs, "NoProducteur", "NoProducteur", films.NoProducteur);
-            ViewData["NoRealisateur"] = new SelectList(_context.Realisateurs, "NoRealisateur", "NoRealisateur", films.NoRealisateur);
-            ViewData["NoUtilisateurMAJ"] = new SelectList(_context.Users, "Id", "Id", films.NoUtilisateurMAJ);
-            return View(films);
+            return View(model);
         }
 
         // GET: Films/Delete/5

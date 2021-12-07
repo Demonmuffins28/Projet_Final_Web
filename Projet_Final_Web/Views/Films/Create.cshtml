@@ -1,4 +1,4 @@
-﻿@model Projet_Final_Web.ViewModel.AjoutDVDViewModel
+﻿@model Projet_Final_Web.ViewModel.AjoutEditDVDViewModel
 
 @{
     ViewData["Title"] = "Create";
@@ -124,7 +124,7 @@
                 <div class="form-group">
                     <label class="col-form-label" for="idImage">Image de Pochette: </label>
                     <input type="file" class="form-control @ViewBag.ErreurImageClass" id="idImage" asp-for="image" accept="image/*" onchange="montrerImage(event)" />
-                    <img style="width: 400px; height: 550px; object-fit: cover;" src="~/Images/default.png" class="img-thumbnail mt-4" id="idMontrerImage">
+                    <img style="width: 15rem" height="250" src="~/Images/default.png" class="img-thumbnail mt-4" id="idMontrerImage">
                     <span class="invalid-feedback text-center" id="messageInvalideImage">@ViewBag.ErreurPasImage</span>
                 </div>
                 
