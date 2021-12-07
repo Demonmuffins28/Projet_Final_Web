@@ -1,117 +1,143 @@
-﻿@model Projet_Final_Web.Models.Films
+﻿@model Projet_Final_Web.ViewModel.DetailSupprimerViewModel
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Supprimer";
+    string lienImage = Model.Film.ImagePochette != null ? "/Images/" + Model.Film.ImagePochette : "/Images/default.png";
 }
 
-<h1>Delete</h1>
+<h1>Suppression du DVD @Model.Film.TitreFrancais</h1>
 
-<h3>Are you sure you want to delete this?</h3>
 <div>
-    <h4>Films</h4>
     <hr />
+    <h4 class="text-danger">Êtes-vous sûr de vouloir supprimer se DVD ?</h4>
+    <img style="width: 16rem" height="225" src="@lienImage" class="img-thumbnail mb-4">
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AnneeSortie)
+        <dt class="col-sm-12 col-lg-3">
+            Titre Francais :
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AnneeSortie)
+        <dd class="col-sm-12 col-lg-9">
+            @Html.DisplayFor(model => model.Film.TitreFrancais)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DateMAJ)
+        <dt class="col-sm-12 col-lg-3">
+            Résumer :
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DateMAJ)
+        <dd class="col-sm-12 col-lg-9">
+            @Html.DisplayFor(model => model.Film.Resume)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Resume)
+        <dt class="col-sm-12 col-lg-3">
+            Catégorie :
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Resume)
+        <dd class="col-sm-12 col-lg-9">
+            @Model.Categorie
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DureeMinutes)
+        <dt class="col-sm-12 col-lg-3">
+            Année de Sortie :
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DureeMinutes)
+        <dd class="col-sm-12 col-lg-9">
+            @Html.DisplayFor(model => model.Film.AnneeSortie)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FilmOriginal)
+        <dt class="col-sm-12 col-lg-3">
+            Date de la dernière mise à jour :
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FilmOriginal)
+        <dd class="col-sm-12 col-lg-9">
+            @Html.DisplayFor(model => model.Film.DateMAJ)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ImagePochette)
+        <dt class="col-sm-12 col-lg-3">
+            Durée en minutes :
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImagePochette)
+        <dd class="col-sm-12 col-lg-9">
+            @Html.DisplayFor(model => model.Film.DureeMinutes)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NbDisques)
+        <dt class="col-sm-12 col-lg-3">
+            Est-ce le film original ? :
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NbDisques)
+        <dd class="col-sm-12 col-lg-9">
+            @Html.DisplayFor(model => model.Film.FilmOriginal)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TitreFrancais)
+        <dt class="col-sm-12 col-lg-3">
+            Nombre de disques :
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TitreFrancais)
+        <dd class="col-sm-12 col-lg-9">
+            @Html.DisplayFor(model => model.Film.NbDisques)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TitreOriginal)
+        <dt class="col-sm-12 col-lg-3">
+            Titre Original :
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TitreOriginal)
+        <dd class="col-sm-12 col-lg-9">
+            @Html.DisplayFor(model => model.Film.TitreOriginal)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.VersionEtendue)
+        <dt class="col-sm-12 col-lg-3">
+            Est-ce la version étendue ? :
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.VersionEtendue)
+        <dd class="col-sm-12 col-lg-9">
+            @Html.DisplayFor(model => model.Film.VersionEtendue)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Xtra)
+        <dt class="col-sm-12 col-lg-3">
+            @Model.Format
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Xtra)
+        <dd class="col-sm-12 col-lg-9">
+            @Html.DisplayFor(model => model.Film.Formats.Description)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Categories)
+        <dt class="col-sm-12 col-lg-3">
+            Utilisateur ayant le DVD en main :
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Categories.NoCategorie)
-        </dd class>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Formats)
+        <dd class="col-sm-12 col-lg-9">
+            @Html.DisplayFor(model => model.NomEmprunter)
+        </dd>
+        <dt class="col-sm-12 col-lg-3">
+            Utilisateur ayant acheté le DVD :
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Formats.NoFormat)
-        </dd class>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Utilisateurs)
+        <dd class="col-sm-12 col-lg-9">
+            @Html.DisplayFor(model => model.NomProprietaire)
+        </dd>
+        <dt class="col-sm-12 col-lg-3">
+            Réalisateur :
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Utilisateurs.Id)
-        </dd class>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Realisateurs)
+        <dd class="col-sm-12 col-lg-9">
+            @Model.Realisateur
+        </dd>
+        <dt class="col-sm-12 col-lg-3">
+            Producteur :
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Realisateurs.NoRealisateur)
-        </dd class>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Producteurs)
+        <dd class="col-sm-12 col-lg-9">
+            @Model.Producteur
+        </dd>
+        <dt class="col-sm-12 col-lg-3">
+            Acteurs Principals :
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Producteurs.NoProducteur)
-        </dd class>
+        <dd class="col-sm-12 col-lg-9">
+            @String.Join(", ", Model.ListFilmActeur.ToArray())
+        </dd>
+        <dt class="col-sm-12 col-lg-3">
+            Langues :
+        </dt>
+        <dd class="col-sm-12 col-lg-9">
+            @String.Join(", ", Model.ListFilmsLangues.ToArray())
+        </dd>
+        <dt class="col-sm-12 col-lg-3">
+            Sous titres :
+        </dt>
+        <dd class="col-sm-12 col-lg-9">
+            @String.Join(", ", Model.ListFilmsSousTitres.ToArray())
+        </dd>
+        <dt class="col-sm-12 col-lg-3">
+            Supplements :
+        </dt>
+        <dd class="col-sm-12 col-lg-9">
+            @String.Join(", ", Model.ListFilmsSupplements.ToArray())
+        </dd>
+        <dt class="col-sm-12 col-lg-3">
+            Autre Informations :
+        </dt>
+        <dd class="col-sm-12 col-lg-9">
+            @Html.DisplayFor(model => model.Film.Xtra)
+        </dd>
     </dl>
-    
     <form asp-action="Delete">
-        <input type="hidden" asp-for="NoFilm" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        <input type="hidden" asp-for="Film.NoFilm" />
+        <input type="hidden" asp-for="LienRetour" />
+        <input type="submit" value="Supprimer" class="btn btn-danger" /> |
+        <a href="@Model.LienRetour">Retour</a>
     </form>
 </div>
+
