@@ -73,11 +73,11 @@ namespace Projet_Final_Web.Controllers
             {
                 TypeAjout = 1,
                 LienRetour = Request.Headers["Referer"].ToString(),
-                utilisateursSelectionner = utilisateursActuel,
-                typeUtilisateursConnecter = utilisateursActuel.TypesUtilisateur.TypeUtilisateur
+                IDUtilisateursSelectionner = utilisateursActuel.Id,
+                typeUtilisateursConnecter = utilisateursActuel.TypesUtilisateurID
             };
 
-            ViewData["listUtilisateurs"] = await _userManager.Users.Select()
+            ViewData["listUtilisateurs"] = new SelectList(_userManager.Users.Where(a => a.TypesUtilisateurID != "A"), "Id", "UserName");
             return View(model);
         }
 
@@ -92,6 +92,11 @@ namespace Projet_Final_Web.Controllers
             ViewData["ErreurImageClass"] = "";
             ViewData["ErreurPasImage"] = "";
 
+            Utilisateurs utilisateursActuel = await _userManager.GetUserAsync(HttpContext.User);
+            model.typeUtilisateursConnecter = utilisateursActuel.TypesUtilisateurID;
+            ViewData["listUtilisateurs"] = new SelectList(_userManager.Users.Where(a => a.TypesUtilisateurID != "A"), "Id", "UserName");
+
+
             if (!string.IsNullOrEmpty(btnAjouterSelectionner)) // Verifie que le submit button a ete clicker et non le dropdown list
             {
                 if (model.TypeAjout == 1)
@@ -99,7 +104,6 @@ namespace Projet_Final_Web.Controllers
                     if (await TitresDVDSontValid(model))
                     {
                         List<string> listTitreNonNull = model.DictionaryNomFilm.Values.Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
-                        Utilisateurs utilisateursActuel = await _userManager.GetUserAsync(HttpContext.User);
                         DateTime dateToday = DateTime.Now;
                         string debutNoFilm = dateToday.ToString("yyMM");
                         int dernierNoSeq = _context.Films.Where(f => f.NoFilm.ToString().Substring(0, 4) == debutNoFilm).Count();
@@ -111,7 +115,7 @@ namespace Projet_Final_Web.Controllers
                                 NoFilm = Convert.ToInt32(debutNoFilm + dernierNoSeq.ToString("D2")),
                                 DateMAJ = dateToday,
                                 TitreFrancais = titreDVD.Trim().Substring(0,1).ToUpper() + titreDVD.Trim().Substring(1,titreDVD.Trim().Length-1),
-                                NoUtilisateurMAJ = utilisateursActuel.Id
+                                NoUtilisateurMAJ = model.typeUtilisateursConnecter == "S" ? model.IDUtilisateursSelectionner : utilisateursActuel.Id
                             };
                             Exemplaires exemplaires = new Exemplaires()
                             {
@@ -140,13 +144,12 @@ namespace Projet_Final_Web.Controllers
                     {
                         if (await ValidationAjoutComplet(model))
                         {
-                            Utilisateurs utilisateursActuel = await _userManager.GetUserAsync(HttpContext.User);
                             DateTime dateToday = DateTime.Now;
                             string debutNoFilm = dateToday.ToString("yyMM");
                             int NoSeq = _context.Films.Where(f => f.NoFilm.ToString().Substring(0, 4) == debutNoFilm).Count()+1;
                             model.Film.NoFilm = Convert.ToInt32(debutNoFilm + NoSeq.ToString("D2"));
                             model.Film.DateMAJ = dateToday;
-                            model.Film.NoUtilisateurMAJ = utilisateursActuel.Id;    
+                            model.Film.NoUtilisateurMAJ = model.typeUtilisateursConnecter == "S" ? model.IDUtilisateursSelectionner : utilisateursActuel.Id;    
                             model.Film.TitreFrancais = model.Film.TitreFrancais.Trim().Substring(0, 1).ToUpper() + model.Film.TitreFrancais.Trim().Substring(1, model.Film.TitreFrancais.Trim().Length - 1);
                             
                             if (model.image != null)
@@ -165,7 +168,7 @@ namespace Projet_Final_Web.Controllers
                             Exemplaires exemplaires = new Exemplaires()
                             {
                                 NoExemplaire = Convert.ToInt32(model.Film.NoFilm + "01"),
-                                NoUtilisateurProprietaire = utilisateursActuel.Id
+                                NoUtilisateurProprietaire = model.typeUtilisateursConnecter == "S" ? model.IDUtilisateursSelectionner : utilisateursActuel.Id
                             };
                             EmpruntsFilms empruntsFilms = new EmpruntsFilms()
                             {

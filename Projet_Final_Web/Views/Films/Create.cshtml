@@ -18,8 +18,7 @@
             @if (Model.typeUtilisateursConnecter == "S")
             {
                 <h6>L'ajout est effectuer pour : </h6>
-                <select class="form-control" asp-for="utilisateursSelectionner" asp-items="ViewBag.listUtilisateurs"></select>
-
+                <select class="form-control mb-3" asp-for="IDUtilisateursSelectionner" asp-items="ViewBag.listUtilisateurs"></select>
             }
             @if (Model.TypeAjout == 1)
             {
