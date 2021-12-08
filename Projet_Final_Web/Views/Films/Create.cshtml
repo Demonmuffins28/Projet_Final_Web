@@ -15,6 +15,12 @@
                 <select class="form-control" asp-for="TypeAjout" asp-items="Model.ListTypeAjout" onchange="this.form.submit()"></select>
             </div>
             <hr />
+            @if (Model.typeUtilisateursConnecter == "S")
+            {
+                <h6>L'ajout est effectuer pour : </h6>
+                <select class="form-control" asp-for="utilisateursSelectionner" asp-items="ViewBag.listUtilisateurs"></select>
+
+            }
             @if (Model.TypeAjout == 1)
             {
                 <h5 class="text-center">Vous pouvez ajouter jusqu'à 10 DVD</h5>
@@ -127,7 +133,7 @@
                     <img style="width: 15rem" height="250" src="~/Images/default.png" class="img-thumbnail mt-4" id="idMontrerImage">
                     <span class="invalid-feedback text-center" id="messageInvalideImage">@ViewBag.ErreurPasImage</span>
                 </div>
-                
+
 
             }
             <div class="d-flex justify-content-center">

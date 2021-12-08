@@ -62,15 +62,22 @@ namespace Projet_Final_Web.Controllers
         }
 
         // GET: Films/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             ViewData["ErreurGlobal"] = "";
+
+            Utilisateurs utilisateursActuel = await _userManager.GetUserAsync(HttpContext.User);
+
 
             AjoutEditDVDViewModel model = new AjoutEditDVDViewModel()
             {
                 TypeAjout = 1,
-                LienRetour = Request.Headers["Referer"].ToString()
+                LienRetour = Request.Headers["Referer"].ToString(),
+                utilisateursSelectionner = utilisateursActuel,
+                typeUtilisateursConnecter = utilisateursActuel.TypesUtilisateur.TypeUtilisateur
             };
+
+            ViewData["listUtilisateurs"] = await _userManager.Users.Select()
             return View(model);
         }
 
