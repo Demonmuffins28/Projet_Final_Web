@@ -33,6 +33,35 @@ namespace Projet_Final_Web.Controllers
             return View(await dbContextProjetFinal.ToListAsync());
         }
 
+        public async Task<IActionResult> Emprunt(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            Films films = await _context.Films.FirstOrDefaultAsync(m => m.NoFilm == id);
+
+            DetailSupprimerViewModel model = new DetailSupprimerViewModel()
+            {
+                Film = await _context.Films.FirstOrDefaultAsync(m => m.NoFilm == id),
+                ListFilmActeur = _context.FilmsActeurs.Where(a => a.NoFilm == id).Select(a => a.Acteurs.Nom).ToList(),
+                ListFilmsLangues = _context.FilmsLangues.Where(a => a.NoFilm == id).Select(a => a.Langues.Langue).ToList(),
+                ListFilmsSousTitres = _context.FilmsSousTitres.Where(a => a.NoFilm == id).Select(a => a.SousTitres.LangueSousTitre).ToList(),
+                ListFilmsSupplements = _context.FilmsSupplements.Where(a => a.NoFilm == id).Select(a => a.Supplements.Description).ToList(),
+                NomEmprunter = (await _userManager.FindByIdAsync(films.NoUtilisateurMAJ)).UserName,
+                NomProprietaire = (await _userManager.FindByIdAsync(_context.Exemplaires.FirstOrDefault(a => a.NoExemplaire.ToString().Substring(0, 6) == id.ToString()).NoUtilisateurProprietaire)).UserName,
+                LienRetour = Request.Headers["Referer"].ToString(),
+                Categorie = films.NoCategorie != null ? _context.Categories.FirstOrDefault(c => c.NoCategorie == films.NoCategorie).Description : "",
+                Format = films.Formats != null ? _context.Formats.FirstOrDefault(c => c.NoFormat == films.NoFormat).Description : "",
+                Realisateur = films.NoRealisateur != null ? _context.Realisateurs.FirstOrDefault(c => c.NoRealisateur == films.NoRealisateur).Nom : "",
+                Producteur = films.NoProducteur != null ? _context.Producteurs.FirstOrDefault(c => c.NoProducteur == films.NoProducteur).Nom : ""
+            };
+
+            return View(model);
+        }
+
+
         // GET: Films/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -338,6 +367,7 @@ namespace Projet_Final_Web.Controllers
                 LienRetour = Request.Headers["Referer"].ToString(),
                 Film = films
             };
+
 
             List<int> ListNoActeur = _context.FilmsActeurs.Where(a => a.NoFilm == films.NoFilm).Select(a => a.NoActeur).ToList();
             List<int> ListNoLangue = _context.FilmsLangues.Where(a => a.NoFilm == films.NoFilm).Select(a => a.NoLangue).ToList();
