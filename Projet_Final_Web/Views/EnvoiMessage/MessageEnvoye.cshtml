@@ -1,0 +1,27 @@
+﻿@model Projet_Final_Web.ViewModel.MessageViewModel
+
+@{
+    ViewData["Title"] = "Envoi Message";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Contenu du message envoyé.</h2>
+
+<div>
+    <span>Destinataire(s): </span>
+    <span>Liste destinataires</span>
+</div>
+
+<br />
+
+<div>
+    <span>Sujet: </span>
+    @Html.DisplayFor(model => model.Sujet)
+</div>
+
+<br />
+
+<div>
+    <span>Contenu: </span>
+    @Html.DisplayFor(model => model.Corps)
+</div>

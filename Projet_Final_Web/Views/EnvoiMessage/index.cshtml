@@ -1,0 +1,77 @@
+﻿@model Projet_Final_Web.ViewModel.MessageViewModel
+
+@{
+    ViewData["Title"] = "Message";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string classDestinataire = "";
+}
+
+@if (!Model.Specific)
+{
+    <h2>Envoyer un message à un ou plusieurs utilisateurs</h2>
+} else
+{
+    <h2>Envoyer un message</h2>
+}
+
+<hr/>
+
+@using (Html.BeginForm("index", "EnvoiMessage", FormMethod.Post, new {id = "frmSaisie"}))
+{
+    @if (!Model.Specific)
+    {    
+        <div class="input-group mb-3">
+            @Html.CheckBoxFor(model => model.AllUtilisateurs, new { @onChange = "this.form.submit()"})
+            <span style="margin-left: 5px">Envoyer à tous les utilisateurs?</span>
+        </div>
+    }
+
+    @if (Model.AllUtilisateurs) { classDestinataire = "invisible"; }
+    else { classDestinataire = "visible"; }
+
+    @if (Model.ListUtilisateurs.Any())
+    {
+        foreach (int util in Model.ListUtilisateurs)
+        {
+            <div class="input-group mb-3 @classDestinataire">
+                <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon3">Destinataire(s) : </span>
+                <select asp-for="Utilisateur.Id" class="form-control" asp-items="ViewBag.NoUtilisateur" Selected=@util disabled></select>
+                </div>                                       
+            </div>
+        }
+    }
+
+    <div class="input-group mb-3 @classDestinataire">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="basic-addon3">Destinataire(s) : </span>
+        <select asp-for="Utilisateur.Id" class="form-control" asp-items="ViewBag.NoUtilisateur" onchange="this.form.submit()"></select>     
+        <input asp-for="ListUtilisateurs" class="form-control" type="hidden"/>
+      </div>
+    </div>
+
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text">Sujet : </span>
+      </div>
+        <input asp-for="Sujet" class="form-control" name="Sujet" />
+        <span asp-validation-for="Sujet" class="text-danger"></span>
+    </div>
+
+    <div class="input-group">
+      <div class="input-group-prepend">
+        <span class="input-group-text">Contenu : </span>
+      </div>
+      <textarea asp-for="Corps" class="form-control" name="Corps"></textarea>
+       <span asp-validation-for="Corps" class="text-danger"></span>
+    </div>
+
+    <div class="input-group" style="margin-top: 16px">
+        <div class="input-group-prepend">
+            <button type="submit" class="btn btn-success" asp-action="MessageEnvoye" formmethod="Get">
+                Envoyé le message
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+}
