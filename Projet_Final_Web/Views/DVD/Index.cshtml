@@ -7,6 +7,7 @@
 
     int pagePrecedent = Model.page - 1;
     int pageSuivant = Model.page + 1;
+    var currentUser = await UserManager.GetUserAsync(User);
 }
 
 <div class="col-12">
@@ -37,7 +38,7 @@
                         </ul>
                         <hr />
                         <div class="text-center justify-content-center row">
-                            @if (utilisateurAyantDVDEnMain == Model.utilisateursActuel)
+                            @if (utilisateurAyantDVDEnMain == Model.utilisateursActuel || UserManager.GetUserName(User) == "admin" || currentUser.TypesUtilisateurID == "S")
                             {
                                 <a href="/Films/Details/@item.NoFilm" class="btn btn-info col-11" role="button">Détail</a>
                                 <a href="/Films/Edit/@item.NoFilm" class="btn btn-primary col-11 my-1" role="button">Modifier</a>

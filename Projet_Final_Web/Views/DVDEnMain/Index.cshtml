@@ -9,6 +9,7 @@
     int pageSuivant = Model.page + 1;
 
     var userId = (Model.listDVD.Count != 0) ? Model.listDVD[0].NoUtilisateurMAJ : "";
+    var currentUser = await UserManager.GetUserAsync(User);
 }
 
 <div class="col-12">
@@ -29,7 +30,7 @@
                         </h5>
                         <hr />
                         <div class="text-center justify-content-center row">
-                            @if (utilisateurAyantDVDEnMain == Model.utilisateursActuel)
+                            @if (utilisateurAyantDVDEnMain == Model.utilisateursActuel || UserManager.GetUserName(User) == "admin" || currentUser.TypesUtilisateurID == "S")
                             {
                                 <a asp-controller="Films" asp-action="Details" asp-route-id="@item.NoFilm" class="btn btn-info col-11" role="button">Détail</a>
                                 <a asp-controller="Films" asp-action="Edit" asp-route-id="@item.NoFilm" class="btn btn-primary col-11 my-1" role="button">Modifier</a>
