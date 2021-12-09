@@ -61,6 +61,41 @@ namespace Projet_Final_Web.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Emprunt(int id, string LienRetour)
+        {
+            var films = await _context.Films.FindAsync(id);
+            Utilisateurs utilisateursActuel = await _userManager.GetUserAsync(HttpContext.User);
+
+            films.NoUtilisateurMAJ = utilisateursActuel.Id;
+            films.DateMAJ = DateTime.Now;
+
+            int NoExemplaire = Convert.ToInt32(films.NoFilm + "01");
+
+            EmpruntsFilms? emprunt = _context.EmpruntsFilms.FirstOrDefault(a => a.NoUtilisateur == utilisateursActuel.Id && a.NoExemplaire == NoExemplaire);
+
+            if (emprunt == null)
+            {
+                EmpruntsFilms empruntsFilms = new EmpruntsFilms() { 
+                    NoExemplaire =NoExemplaire,
+                    NoUtilisateur = utilisateursActuel.Id,
+                    DateEmprunt = DateTime.Now
+                };
+                _context.Add(empruntsFilms);
+            }
+            else
+            {
+                emprunt.DateEmprunt = DateTime.Now;
+                _context.Update(emprunt);
+            }
+            _context.Update(films);
+
+            await _context.SaveChangesAsync();
+
+            return Redirect(LienRetour);
+        }
+
 
         // GET: Films/Details/5
         public async Task<IActionResult> Details(int? id)

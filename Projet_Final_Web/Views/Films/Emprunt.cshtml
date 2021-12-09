@@ -1,7 +1,7 @@
 ﻿@model Projet_Final_Web.ViewModel.DetailSupprimerViewModel
 
 @{
-    ViewData["Title"] = "Emprunt d'un DVD";
+    ViewData["Title"] = "Supprimer";
     string lienImage = Model.Film.ImagePochette != null ? "/Images/" + Model.Film.ImagePochette : "/Images/default.png";
 }
 
@@ -9,6 +9,7 @@
 
 <div>
     <hr />
+    <h4 class="text-danger">Êtes-vous sûr de vouloir emprunter ce DVD ?</h4>
     <img style="width: 16rem" height="225" src="@lienImage" class="img-thumbnail mb-4">
     <dl class="row">
         <dt class="col-sm-12 col-lg-3">
@@ -132,7 +133,11 @@
             @Html.DisplayFor(model => model.Film.Xtra)
         </dd>
     </dl>
+    <form asp-action="Emprunt">
+        <input type="hidden" asp-for="Film.NoFilm" />
+        <input type="hidden" asp-for="LienRetour" />
+        <input type="submit" value="Emprunter" class="btn btn-success" /> |
+        <a href="@Model.LienRetour">Retour</a>
+    </form>
 </div>
-<div>
-    <a href="@Model.LienRetour">Retour</a>
-</div>
+
