@@ -11,6 +11,7 @@
     <hr />
     <h4 class="text-danger">Êtes-vous sûr de vouloir emprunter ce DVD ?</h4>
     <img style="width: 16rem" height="225" src="@lienImage" class="img-thumbnail mb-4">
+
     <dl class="row">
         <dt class="col-sm-12 col-lg-3">
             Titre Francais :
@@ -136,6 +137,11 @@
     <form asp-action="Emprunt">
         <input type="hidden" asp-for="Film.NoFilm" />
         <input type="hidden" asp-for="LienRetour" />
+        @if (Model.typeUtilisateursConnecter == "S")
+        {
+            <h6>L'emprunt est effectuer pour : </h6>
+            <select class="form-control mb-3" asp-for="IDUtilisateursSelectionner" asp-items="ViewBag.listUtilisateurs"></select>
+        }
         <input type="submit" value="Emprunter" class="btn btn-success" /> |
         <a href="@Model.LienRetour">Retour</a>
     </form>

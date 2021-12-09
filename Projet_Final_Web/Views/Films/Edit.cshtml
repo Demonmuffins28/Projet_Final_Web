@@ -103,6 +103,7 @@
                 </div>
             }
             <input type="hidden" asp-for="Film.ImagePochette" />
+            <input type="hidden" asp-for="Film.NoUtilisateurMAJ" />
             <div class="form-group">
                 <label class="col-form-label" for="idImage">Image de Pochette: </label>
                 <input type="file" class="form-control @ViewBag.ErreurImageClass" id="idImage" asp-for="image" accept="image/*" onchange="montrerImage(event)" />
