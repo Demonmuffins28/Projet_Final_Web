@@ -8,13 +8,13 @@ namespace Projet_Final_Web.ViewModel
 {
     public class LoginViewModel
     {
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "Adresse courriel"), EmailAddress(ErrorMessage = "Adresse courriel invalide")]
         public string Email { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Mot de passe obligatoire!")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
-        [Display(Name = "Remember me")]
+        [Display(Name = "Se souvenir de moi")]
         public bool RememberMe { get; set; }
     }
+
 }

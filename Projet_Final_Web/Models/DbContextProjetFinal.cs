@@ -53,6 +53,7 @@ namespace Projet_Final_Web.Models
         public DbSet<FilmsSousTitres> FilmsSousTitres { get; set; }
         public DbSet<FilmsSupplements> FilmsSupplements { get; set; }
         public DbSet<Projet_Final_Web.ViewModel.UtilisateurViewModel> UtilisateurViewModel { get; set; }
+        public DbSet<Projet_Final_Web.ViewModel.GestionUtilisateurViewModel> GestionUtilisateur { get; set; }
 
 
     }
