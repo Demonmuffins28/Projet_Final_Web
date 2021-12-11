@@ -73,13 +73,14 @@ namespace Projet_Final_Web.Controllers
                 return RedirectToAction("index", "DVD");
             if (ModelState.IsValid)
             {
-
+                //var Id = _userManager.Users.Select(u => u.Id).ToList();
                 var userExist = await _userManager.FindByEmailAsync(model.Courriel);
                 if (userExist is null)
                 {
-                    //TODO add id?
+                    int newId = _userManager.Users.Select(a => Convert.ToInt32(a.Id)).Max() + 1;
                     var user = new Utilisateurs
                     {
+                        Id = newId.ToString(),
                         UserName = model.Prenom,
                         Email = model.Courriel,
                         TypesUtilisateurID = model.TypeUtilisateur
@@ -90,6 +91,25 @@ namespace Projet_Final_Web.Controllers
                     // If user is successfully created, sign-in the user using. SignInManager and redirect to index action of HomeController
                     if (result.Succeeded)
                     {
+
+                        //Ajouter les préférences de base
+                        UtilisateursPreferences prefAjout = new UtilisateursPreferences();
+                        prefAjout.NoUtilisateur = user.Id;
+                        prefAjout.NoPreference = 3;
+
+                        UtilisateursPreferences prefAppropriation = new UtilisateursPreferences();
+                        prefAppropriation.NoUtilisateur = user.Id;
+                        prefAppropriation.NoPreference = 4;
+
+                        UtilisateursPreferences prefRetrait = new UtilisateursPreferences();
+                        prefRetrait.NoUtilisateur = user.Id;
+                        prefRetrait.NoPreference = 5;
+
+                        _context.UtilisateursPreferences.Add(prefAjout);
+                        _context.UtilisateursPreferences.Add(prefAppropriation);
+                        _context.UtilisateursPreferences.Add(prefRetrait);
+                        _context.SaveChanges();
+
                         // TODO: Envoyer un courriel
 
                         return RedirectToAction("index", "GestionUtilisateur");
@@ -179,10 +199,12 @@ namespace Projet_Final_Web.Controllers
 
 
             var deleteUser = await _userManager.FindByIdAsync(id);
+
             if (deleteUser == null)
                 return RedirectToAction(nameof(Index));
             else
             {
+
                 GestionUtilisateurViewModel model = new GestionUtilisateurViewModel();
                 model.Courriel = deleteUser.Email;
                 model.Prenom = deleteUser.UserName;
@@ -201,7 +223,19 @@ namespace Projet_Final_Web.Controllers
             var deleteUser = await _userManager.FindByIdAsync(id);
             if(deleteUser != null) 
             {
+                //Supprimer les preferences
+                try
+                {
+                    _context.UtilisateursPreferences.RemoveRange(_context.UtilisateursPreferences.Where(p => p.NoUtilisateur == deleteUser.Id));
+                    _context.ValeursPreferences.RemoveRange(_context.ValeursPreferences.Where(p => p.NoUtilisateur == deleteUser.Id));
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
                 await _userManager.DeleteAsync(deleteUser);
+                _context.SaveChanges();
             }
             return RedirectToAction(nameof(Index));
         }
