@@ -41,19 +41,24 @@ namespace Projet_Final_Web.Controllers
                 return NotFound();
             }
 
-            var films = await _context.Films
-                .Include(f => f.Categories)
-                .Include(f => f.Formats)
-                .Include(f => f.Producteurs)
-                .Include(f => f.Realisateurs)
-                .Include(f => f.Utilisateurs)
-                .FirstOrDefaultAsync(m => m.NoFilm == id);
-            if (films == null)
-            {
-                return NotFound();
-            }
+            Films films = await _context.Films.FirstOrDefaultAsync(m => m.NoFilm == id);
 
-            return View(films);
+            DetailSupprimerViewModel model = new DetailSupprimerViewModel() {
+                Film = await _context.Films.FirstOrDefaultAsync(m => m.NoFilm == id),
+                ListFilmActeur = _context.FilmsActeurs.Where(a => a.NoFilm == id).Select(a => a.Acteurs.Nom).ToList(),
+                ListFilmsLangues = _context.FilmsLangues.Where(a => a.NoFilm == id).Select(a => a.Langues.Langue).ToList(),
+                ListFilmsSousTitres = _context.FilmsSousTitres.Where(a => a.NoFilm == id).Select(a => a.SousTitres.LangueSousTitre).ToList(),
+                ListFilmsSupplements = _context.FilmsSupplements.Where(a => a.NoFilm == id).Select(a => a.Supplements.Description).ToList(),
+                NomEmprunter = (await _userManager.FindByIdAsync(films.NoUtilisateurMAJ)).UserName,
+                NomProprietaire = (await _userManager.FindByIdAsync(_context.Exemplaires.FirstOrDefault(a=> a.NoExemplaire.ToString().Substring(0, 6) == id.ToString()).NoUtilisateurProprietaire)).UserName,
+                LienRetour = Request.Headers["Referer"].ToString(),
+                Categorie = films.NoCategorie != null ? _context.Categories.FirstOrDefault(c => c.NoCategorie == films.NoCategorie).Description : "",
+                Format = films.Formats != null ? _context.Formats.FirstOrDefault(c => c.NoFormat == films.NoFormat).Description : "",
+                Realisateur = films.NoRealisateur != null ?  _context.Realisateurs.FirstOrDefault(c => c.NoRealisateur == films.NoRealisateur).Nom : "",
+                Producteur = films.NoProducteur != null ?  _context.Producteurs.FirstOrDefault(c => c.NoProducteur == films.NoProducteur).Nom : ""
+            };
+
+            return View(model);
         }
 
         // GET: Films/Create
@@ -489,30 +494,59 @@ namespace Projet_Final_Web.Controllers
                 return NotFound();
             }
 
-            var films = await _context.Films
-                .Include(f => f.Categories)
-                .Include(f => f.Formats)
-                .Include(f => f.Producteurs)
-                .Include(f => f.Realisateurs)
-                .Include(f => f.Utilisateurs)
-                .FirstOrDefaultAsync(m => m.NoFilm == id);
-            if (films == null)
-            {
-                return NotFound();
-            }
+            Films films = await _context.Films.FirstOrDefaultAsync(m => m.NoFilm == id);
 
-            return View(films);
+            DetailSupprimerViewModel model = new DetailSupprimerViewModel()
+            {
+                Film = await _context.Films.FirstOrDefaultAsync(m => m.NoFilm == id),
+                ListFilmActeur = _context.FilmsActeurs.Where(a => a.NoFilm == id).Select(a => a.Acteurs.Nom).ToList(),
+                ListFilmsLangues = _context.FilmsLangues.Where(a => a.NoFilm == id).Select(a => a.Langues.Langue).ToList(),
+                ListFilmsSousTitres = _context.FilmsSousTitres.Where(a => a.NoFilm == id).Select(a => a.SousTitres.LangueSousTitre).ToList(),
+                ListFilmsSupplements = _context.FilmsSupplements.Where(a => a.NoFilm == id).Select(a => a.Supplements.Description).ToList(),
+                NomEmprunter = (await _userManager.FindByIdAsync(films.NoUtilisateurMAJ)).UserName,
+                NomProprietaire = (await _userManager.FindByIdAsync(_context.Exemplaires.FirstOrDefault(a => a.NoExemplaire.ToString().Substring(0, 6) == id.ToString()).NoUtilisateurProprietaire)).UserName,
+                LienRetour = Request.Headers["Referer"].ToString(),
+                Categorie = films.NoCategorie != null ? _context.Categories.FirstOrDefault(c => c.NoCategorie == films.NoCategorie).Description : "",
+                Format = films.Formats != null ? _context.Formats.FirstOrDefault(c => c.NoFormat == films.NoFormat).Description : "",
+                Realisateur = films.NoRealisateur != null ? _context.Realisateurs.FirstOrDefault(c => c.NoRealisateur == films.NoRealisateur).Nom : "",
+                Producteur = films.NoProducteur != null ? _context.Producteurs.FirstOrDefault(c => c.NoProducteur == films.NoProducteur).Nom : ""
+            };
+
+            return View(model);
         }
 
         // POST: Films/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, string LienRetour)
         {
+            var examplaire = await _context.Exemplaires.FindAsync(Convert.ToInt32(id+"01"));
+            var listEmprunt =  _context.EmpruntsFilms.Where(a => a.NoExemplaire == Convert.ToInt32(id + "01"));
+            var ListFilmActeur = _context.FilmsActeurs.Where(a => a.NoFilm == id);
+            var ListFilmsLangues = _context.FilmsLangues.Where(a => a.NoFilm == id);
+            var ListFilmsSousTitres = _context.FilmsSousTitres.Where(a => a.NoFilm == id);
+            var ListFilmsSupplements = _context.FilmsSupplements.Where(a => a.NoFilm == id);
             var films = await _context.Films.FindAsync(id);
+
+            _context.EmpruntsFilms.RemoveRange(listEmprunt);
+            _context.Exemplaires.Remove(examplaire);
+            _context.FilmsActeurs.RemoveRange(ListFilmActeur);
+            _context.FilmsLangues.RemoveRange(ListFilmsLangues);
+            _context.FilmsSousTitres.RemoveRange(ListFilmsSousTitres);
+            _context.FilmsSupplements.RemoveRange(ListFilmsSupplements);
             _context.Films.Remove(films);
+
+            if (films.ImagePochette != null)
+            {
+                string wwwPath = _env.WebRootPath;
+                string path = Path.Combine(wwwPath, "images", films.ImagePochette);
+                if (System.IO.File.Exists(path))
+                    System.IO.File.Delete(path);
+            }
+
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            return Redirect(LienRetour);
         }
 
         private bool FilmsExists(int id)

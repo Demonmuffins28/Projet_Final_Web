@@ -1,0 +1,86 @@
+﻿@model Projet_Final_Web.ViewModel.PersonnalisationViewModel
+
+@{
+    ViewData["Title"] = "Personnalisation";
+}
+
+<h1>Personnalisation de l'environnement</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <h3 class="my-4">@ViewBag.PreferenceSauvegarder</h3>
+        <form asp-action="Index">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input asp-for="Prenom" class="form-control" type="hidden" />
+
+            <div class="form-group row">
+                <label asp-for="Is_Changing_Password" class="control-label col-10"></label>
+                <input id="cb-password" asp-for="Is_Changing_Password" class="form-control col custom-checkbox"/>
+            </div>
+
+                <div id="passwordChange" style="display: none">
+                    <div class="form-group">
+
+                        <label asp-for="Password" class="control-label"></label>
+                        <input asp-for="Password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="ConfirmPassword" class="control-label"></label>
+                        <input asp-for="ConfirmPassword" class="form-control" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+                </div>
+
+            <div class="form-group row">
+                <label asp-for="Courriel_Sur_Ajout" class="control-label col-10"></label>
+                <input asp-for="Courriel_Sur_Ajout" class="form-control col" />
+            </div>
+
+            <div class="form-group row">
+                <label asp-for="Courriel_sur_Retrait" class="control-label col-10"></label>
+                <input asp-for="Courriel_sur_Retrait" class="form-control col" />
+            </div>
+
+            <div class="form-group row">
+                <label asp-for="Courriel_sur_Appropriation" class="control-label col-10"></label>
+                <input asp-for="Courriel_sur_Appropriation" class="form-control col" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="NbDVDParPage" class="control-label"></label>
+                <input type="number" asp-for="NbDVDParPage" class="form-control">
+                <span asp-validation-for="NbDVDParPage" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Sauvegarder" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Retour à la liste des membres</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        $().ready(function() {
+            $("#cb-password").click(function() {
+                if (($(this).is(":checked"))) {
+                    console.log("CheckBox is checked.");
+                    $("#passwordChange").css("display", "block");
+                }
+                else if ($(this).is(":not(:checked)")) {
+                    console.log("Checkbox is unchecked.");
+                    $("#passwordChange").css("display", "none");
+                }
+            });
+        });
+    </script>
+}
+
+

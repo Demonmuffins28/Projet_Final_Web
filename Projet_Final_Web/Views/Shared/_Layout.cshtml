@@ -29,8 +29,11 @@
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                                     <a class="dropdown-item" asp-area="" asp-controller="DVD" asp-action="Index">Tous les DVDs</a>
-                                    <a class="dropdown-item" asp-area="" asp-controller="DVDEnMain" asp-action="Index" asp-route-id="@UserManager.GetUserId(User)">Mes DVDs</a>
-                                    <a class="dropdown-item" asp-area="" asp-controller="ListeEmprunts" asp-action="Index" >Emprunts des membres</a>
+                                    @if (UserManager.GetUserName(User) != "admin")
+                                    {
+                                        <a class="dropdown-item" asp-area="" asp-controller="DVDEnMain" asp-action="Index" asp-route-id="@UserManager.GetUserId(User)">Mes DVDs</a>
+                                    }
+                                    <a class="dropdown-item" asp-area="" asp-controller="ListeEmprunts" asp-action="Index">Emprunts des membres</a>
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item" href="#">Something else here</a>
                                 </div>
@@ -38,14 +41,18 @@
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="EnvoiMessage" asp-action="Index">Envoyer un message</a>
                             </li>
-                            <!--
-                            <li class="nav-item">
-                                <a class="nav-link text-light" asp-area="" asp-controller="DVD" asp-action="Index">DVD</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-light" asp-area="" asp-controller="DVDEnMain" asp-action="Index">Mes DVDs</a>
-                            </li>
-                            -->
+                            @if (UserManager.GetUserName(User) == "admin")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" asp-area="" asp-controller="GestionUtilisateur" asp-action="Index">Gestion Utilisateurs</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" asp-area="" asp-controller="Personnalisation" asp-action="Index">Personnalisation de l’environnement</a>
+                                </li>
+                            }
                         </ul>
                     </div>
                     <form method="post" asp-controller="account" asp-action="logout" class="navbar-right navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">

@@ -1,0 +1,48 @@
+﻿@model IEnumerable<Projet_Final_Web.ViewModel.GestionUtilisateurViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Gestion des utilisateur</h1>
+
+<p>
+    <a asp-action="Create">Enregistrer un nouvel utilisateur</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Prenom)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Courriel)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TypeUtilisateur)
+            </th>
+            <th>
+                Options
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Prenom)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Courriel)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TypeUtilisateur)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Modifier</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Supprimer</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
