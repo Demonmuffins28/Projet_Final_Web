@@ -37,11 +37,11 @@
                                 <a href="/Films/Delete/@item.NoFilm" class="btn btn-danger col-11 mb-1" role="button">Supprimer</a>
                                 if (Model.utilisateursActuel.TypesUtilisateurID == "S")
                                 {
-                                    <a href="/Films/Emprunt/@item.NoFilm" class="btn btn-dark col-11" role="button">Emprunter</a>
+                                    <a href="/Films/Emprunt/@item.NoFilm" class="btn btn-dark col-11 mb-1" role="button">Emprunter</a>
                                 }
                                 @if (utilisateurAyantDVDEnMain != Model.utilisateursActuel || Model.utilisateursActuel.TypesUtilisateurID == "A")
                                 {
-                                    <a href="#" class="btn btn-secondary col-11 mb-1" role="button">Message à l'utilisateur</a>
+                                    <a href="#" class="btn btn-secondary col-11" role="button">Message à l'utilisateur</a>
                                 }
                             }
                             else
