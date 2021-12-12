@@ -22,5 +22,9 @@ namespace Projet_Final_Web.ViewModel
         public string Format { get; set; }
         public string Realisateur { get; set; }
         public string Producteur { get; set; }
+
+        public string IDUtilisateursSelectionner { get; set; }
+
+        public string typeUtilisateursConnecter { get; set; }
     }
 }

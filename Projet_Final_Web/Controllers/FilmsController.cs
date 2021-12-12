@@ -33,6 +33,78 @@ namespace Projet_Final_Web.Controllers
             return View(await dbContextProjetFinal.ToListAsync());
         }
 
+        public async Task<IActionResult> Emprunt(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            Films films = await _context.Films.FirstOrDefaultAsync(m => m.NoFilm == id);
+            Utilisateurs utilisateursActuel = await _userManager.GetUserAsync(HttpContext.User);
+
+
+            DetailSupprimerViewModel model = new DetailSupprimerViewModel()
+            {
+                Film = await _context.Films.FirstOrDefaultAsync(m => m.NoFilm == id),
+                ListFilmActeur = _context.FilmsActeurs.Where(a => a.NoFilm == id).Select(a => a.Acteurs.Nom).ToList(),
+                ListFilmsLangues = _context.FilmsLangues.Where(a => a.NoFilm == id).Select(a => a.Langues.Langue).ToList(),
+                ListFilmsSousTitres = _context.FilmsSousTitres.Where(a => a.NoFilm == id).Select(a => a.SousTitres.LangueSousTitre).ToList(),
+                ListFilmsSupplements = _context.FilmsSupplements.Where(a => a.NoFilm == id).Select(a => a.Supplements.Description).ToList(),
+                NomEmprunter = (await _userManager.FindByIdAsync(films.NoUtilisateurMAJ)).UserName,
+                NomProprietaire = (await _userManager.FindByIdAsync(_context.Exemplaires.FirstOrDefault(a => a.NoExemplaire.ToString().Substring(0, 6) == id.ToString()).NoUtilisateurProprietaire)).UserName,
+                LienRetour = Request.Headers["Referer"].ToString(),
+                Categorie = films.NoCategorie != null ? _context.Categories.FirstOrDefault(c => c.NoCategorie == films.NoCategorie).Description : "",
+                Format = films.Formats != null ? _context.Formats.FirstOrDefault(c => c.NoFormat == films.NoFormat).Description : "",
+                Realisateur = films.NoRealisateur != null ? _context.Realisateurs.FirstOrDefault(c => c.NoRealisateur == films.NoRealisateur).Nom : "",
+                Producteur = films.NoProducteur != null ? _context.Producteurs.FirstOrDefault(c => c.NoProducteur == films.NoProducteur).Nom : "",
+                IDUtilisateursSelectionner = utilisateursActuel.Id,
+                typeUtilisateursConnecter = utilisateursActuel.TypesUtilisateurID
+            };
+
+            ViewData["listUtilisateurs"] = new SelectList(_userManager.Users.Where(a => a.TypesUtilisateurID != "A"), "Id", "UserName");
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Emprunt(int id, string LienRetour, string IDUtilisateursSelectionner)
+        {
+            var films = await _context.Films.FindAsync(id);
+            Utilisateurs utilisateursActuel = await _userManager.GetUserAsync(HttpContext.User);
+
+            string NouTilisateur = utilisateursActuel.TypesUtilisateurID == "S" ? IDUtilisateursSelectionner : utilisateursActuel.Id;
+
+            films.NoUtilisateurMAJ = NouTilisateur;
+            films.DateMAJ = DateTime.Now;
+
+            int NoExemplaire = Convert.ToInt32(films.NoFilm + "01");
+
+            EmpruntsFilms? emprunt = _context.EmpruntsFilms.FirstOrDefault(a => a.NoUtilisateur == NouTilisateur && a.NoExemplaire == NoExemplaire);
+
+            if (emprunt == null)
+            {
+                EmpruntsFilms empruntsFilms = new EmpruntsFilms() { 
+                    NoExemplaire =NoExemplaire,
+                    NoUtilisateur = NouTilisateur,
+                    DateEmprunt = DateTime.Now
+                };
+                _context.Add(empruntsFilms);
+            }
+            else
+            {
+                emprunt.DateEmprunt = DateTime.Now;
+                _context.Update(emprunt);
+            }
+            _context.Update(films);
+
+            await _context.SaveChangesAsync();
+
+            return Redirect(LienRetour);
+        }
+
+
         // GET: Films/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -62,15 +134,22 @@ namespace Projet_Final_Web.Controllers
         }
 
         // GET: Films/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             ViewData["ErreurGlobal"] = "";
+
+            Utilisateurs utilisateursActuel = await _userManager.GetUserAsync(HttpContext.User);
+
 
             AjoutEditDVDViewModel model = new AjoutEditDVDViewModel()
             {
                 TypeAjout = 1,
-                LienRetour = Request.Headers["Referer"].ToString()
+                LienRetour = Request.Headers["Referer"].ToString(),
+                IDUtilisateursSelectionner = utilisateursActuel.Id,
+                typeUtilisateursConnecter = utilisateursActuel.TypesUtilisateurID
             };
+
+            ViewData["listUtilisateurs"] = new SelectList(_userManager.Users.Where(a => a.TypesUtilisateurID != "A"), "Id", "UserName");
             return View(model);
         }
 
@@ -85,6 +164,11 @@ namespace Projet_Final_Web.Controllers
             ViewData["ErreurImageClass"] = "";
             ViewData["ErreurPasImage"] = "";
 
+            Utilisateurs utilisateursActuel = await _userManager.GetUserAsync(HttpContext.User);
+            model.typeUtilisateursConnecter = utilisateursActuel.TypesUtilisateurID;
+            ViewData["listUtilisateurs"] = new SelectList(_userManager.Users.Where(a => a.TypesUtilisateurID != "A"), "Id", "UserName");
+
+
             if (!string.IsNullOrEmpty(btnAjouterSelectionner)) // Verifie que le submit button a ete clicker et non le dropdown list
             {
                 if (model.TypeAjout == 1)
@@ -92,7 +176,6 @@ namespace Projet_Final_Web.Controllers
                     if (await TitresDVDSontValid(model))
                     {
                         List<string> listTitreNonNull = model.DictionaryNomFilm.Values.Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
-                        Utilisateurs utilisateursActuel = await _userManager.GetUserAsync(HttpContext.User);
                         DateTime dateToday = DateTime.Now;
                         string debutNoFilm = dateToday.ToString("yyMM");
                         int dernierNoSeq = _context.Films.Where(f => f.NoFilm.ToString().Substring(0, 4) == debutNoFilm).Count();
@@ -104,7 +187,7 @@ namespace Projet_Final_Web.Controllers
                                 NoFilm = Convert.ToInt32(debutNoFilm + dernierNoSeq.ToString("D2")),
                                 DateMAJ = dateToday,
                                 TitreFrancais = titreDVD.Trim().Substring(0,1).ToUpper() + titreDVD.Trim().Substring(1,titreDVD.Trim().Length-1),
-                                NoUtilisateurMAJ = utilisateursActuel.Id
+                                NoUtilisateurMAJ = model.typeUtilisateursConnecter == "S" ? model.IDUtilisateursSelectionner : utilisateursActuel.Id
                             };
                             Exemplaires exemplaires = new Exemplaires()
                             {
@@ -133,13 +216,12 @@ namespace Projet_Final_Web.Controllers
                     {
                         if (await ValidationAjoutComplet(model))
                         {
-                            Utilisateurs utilisateursActuel = await _userManager.GetUserAsync(HttpContext.User);
                             DateTime dateToday = DateTime.Now;
                             string debutNoFilm = dateToday.ToString("yyMM");
                             int NoSeq = _context.Films.Where(f => f.NoFilm.ToString().Substring(0, 4) == debutNoFilm).Count()+1;
                             model.Film.NoFilm = Convert.ToInt32(debutNoFilm + NoSeq.ToString("D2"));
                             model.Film.DateMAJ = dateToday;
-                            model.Film.NoUtilisateurMAJ = utilisateursActuel.Id;    
+                            model.Film.NoUtilisateurMAJ = model.typeUtilisateursConnecter == "S" ? model.IDUtilisateursSelectionner : utilisateursActuel.Id;    
                             model.Film.TitreFrancais = model.Film.TitreFrancais.Trim().Substring(0, 1).ToUpper() + model.Film.TitreFrancais.Trim().Substring(1, model.Film.TitreFrancais.Trim().Length - 1);
                             
                             if (model.image != null)
@@ -158,7 +240,7 @@ namespace Projet_Final_Web.Controllers
                             Exemplaires exemplaires = new Exemplaires()
                             {
                                 NoExemplaire = Convert.ToInt32(model.Film.NoFilm + "01"),
-                                NoUtilisateurProprietaire = utilisateursActuel.Id
+                                NoUtilisateurProprietaire = model.typeUtilisateursConnecter == "S" ? model.IDUtilisateursSelectionner : utilisateursActuel.Id
                             };
                             EmpruntsFilms empruntsFilms = new EmpruntsFilms()
                             {
@@ -329,6 +411,7 @@ namespace Projet_Final_Web.Controllers
                 Film = films
             };
 
+
             List<int> ListNoActeur = _context.FilmsActeurs.Where(a => a.NoFilm == films.NoFilm).Select(a => a.NoActeur).ToList();
             List<int> ListNoLangue = _context.FilmsLangues.Where(a => a.NoFilm == films.NoFilm).Select(a => a.NoLangue).ToList();
             List<int> ListNoSousTitre = _context.FilmsSousTitres.Where(a => a.NoFilm == films.NoFilm).Select(a => a.NoSousTitre).ToList();
@@ -385,12 +468,10 @@ namespace Projet_Final_Web.Controllers
             {
                 if (await ValidationAjoutComplet(model))
                 {
-                    Utilisateurs utilisateursActuel = await _userManager.GetUserAsync(HttpContext.User);
                     DateTime dateToday = DateTime.Now;
                     string debutNoFilm = dateToday.ToString("yyMM");
                     int NoSeq = _context.Films.Where(f => f.NoFilm.ToString().Substring(0, 4) == debutNoFilm).Count() + 1;
                     model.Film.DateMAJ = dateToday;
-                    model.Film.NoUtilisateurMAJ = utilisateursActuel.Id;
                     model.Film.TitreFrancais = model.Film.TitreFrancais.Trim().Substring(0, 1).ToUpper() + model.Film.TitreFrancais.Trim().Substring(1, model.Film.TitreFrancais.Trim().Length - 1);
 
                     if (model.image != null)

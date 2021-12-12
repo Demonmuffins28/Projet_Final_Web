@@ -43,5 +43,9 @@ namespace Projet_Final_Web.ViewModel
         };
 
         public IFormFile image { get; set; }
+
+        public string  IDUtilisateursSelectionner { get; set; }
+
+        public string typeUtilisateursConnecter { get; set; }
     }
 }
