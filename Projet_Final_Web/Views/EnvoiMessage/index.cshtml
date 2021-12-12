@@ -1,4 +1,4 @@
-﻿@model Projet_Final_Web.ViewModel.MessageViewModel
+﻿@model Projet_Final_Web.ViewModel.Message
 
 @{
     ViewData["Title"] = "Message";
@@ -29,25 +29,23 @@
     @if (Model.AllUtilisateurs) { classDestinataire = "invisible"; }
     else { classDestinataire = "visible"; }
 
-    @if (Model.ListUtilisateurs.Any())
+    @if (!Model.Specific)
     {
-        foreach (int util in Model.ListUtilisateurs)
-        {
-            <div class="input-group mb-3 @classDestinataire">
-                <div class="input-group-prepend">
-                <span class="input-group-text" id="basic-addon3">Destinataire(s) : </span>
-                <select asp-for="Utilisateur.Id" class="form-control" asp-items="ViewBag.NoUtilisateur" Selected=@util disabled></select>
-                </div>                                       
-            </div>
-        }
+        <div class="input-group mb-3 @classDestinataire">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon3">Destinataire(s) : </span>
+            <select asp-for="UserId" class="form-control" asp-items="ViewBag.lstUtil" onchange="this.form.submit()"></select>     
+            <input asp-for="ListUtilisateurs" class="form-control" type="hidden"/>
+          </div>
+        </div>
     }
 
     <div class="input-group mb-3 @classDestinataire">
-      <div class="input-group-prepend">
-        <span class="input-group-text" id="basic-addon3">Destinataire(s) : </span>
-        <select asp-for="Utilisateur.Id" class="form-control" asp-items="ViewBag.NoUtilisateur" onchange="this.form.submit()"></select>     
-        <input asp-for="ListUtilisateurs" class="form-control" type="hidden"/>
-      </div>
+        <span>Destinataire(s): </span>
+        @if (Model.ListUtilisateurs.Any())
+        {       
+            <span> @String.Join(", ", Model.ListUtilisateurs.ToArray())</span>
+        }
     </div>
 
     <div class="input-group mb-3">
@@ -68,7 +66,7 @@
 
     <div class="input-group" style="margin-top: 16px">
         <div class="input-group-prepend">
-            <button type="submit" class="btn btn-success" asp-action="MessageEnvoye" formmethod="Get">
+            <button type="submit" class="btn btn-success">
                 Envoyé le message
                 <i class="fas fa-paper-plane"></i>
             </button>

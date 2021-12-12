@@ -1,4 +1,4 @@
-﻿@model Projet_Final_Web.ViewModel.MessageViewModel
+﻿@model Projet_Final_Web.ViewModel.Message
 
 @{
     ViewData["Title"] = "Envoi Message";
@@ -9,7 +9,7 @@
 
 <div>
     <span>Destinataire(s): </span>
-    <span>Liste destinataires</span>
+    <span> @String.Join(", ", Model.ListUtilisateurs.ToArray())</span>
 </div>
 
 <br />

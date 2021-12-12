@@ -4,15 +4,17 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Projet_Final_Web.ViewModel
 {
-    public class MessageViewModel
+    public class Message
     {
+        public bool btnEnvoye { get; set; } = false;
         public bool AllUtilisateurs { get; set; }
         public bool Specific { get; set; }
-        public List<int> ListUtilisateurs { get; set; }
+        public List<string> ListUtilisateurs { get; set; }
+
         [Required]
         public string Sujet { get; set; }
         [Required]
         public string Corps { get; set; }
-        public Utilisateurs Utilisateur { get; set; }
+        public string UserId { get; set; }
     }
 }

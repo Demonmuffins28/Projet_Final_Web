@@ -18,6 +18,7 @@ namespace Projet_Final_Web.Controllers
         private readonly DbContextProjetFinal _context;
         private readonly UserManager<Utilisateurs> _userManager;
         private IWebHostEnvironment _env;
+        private static List<string> lstId;
 
         public EnvoiMessageController(DbContextProjetFinal context, UserManager<Utilisateurs> userManager, IWebHostEnvironment env)
         {
@@ -28,49 +29,63 @@ namespace Projet_Final_Web.Controllers
 
         public IActionResult Index()
         {
-            MessageViewModel model = new MessageViewModel();
-            model.ListUtilisateurs = new List<int>();
-            //TempData["dest"] = model.ListUtilisateurs;
-            ViewData["NoUtilisateur"] = new SelectList(_userManager.Users, "Id", "Email").Prepend(new SelectListItem("", null));            
+            Message model = new Message();
+            lstId = new List<string>();
+            model.ListUtilisateurs = lstId;
+            ViewData["NoUtilisateur"] = new SelectList(_userManager.Users, "Id", "Email").Prepend(new SelectListItem("", null));
+            ViewData["lstUtil"] = new SelectList(_userManager.Users, "Id", "Email").Prepend(new SelectListItem("", null));
             return View(model);
         }
 
-        public IActionResult EnvoiUtil(int? id)
+        public async Task<IActionResult> EnvoiUtil(int? id)
         {
-            MessageViewModel model = new MessageViewModel();
-            model.ListUtilisateurs = new List<int>();
+            Message model = new Message();
+            lstId = new List<string>();
+            lstId.Add((await _userManager.FindByIdAsync(Convert.ToString(id))).Email);
+            model.ListUtilisateurs = lstId;
             model.Specific = true;
-            ViewData["NoUtilisateur"] = new SelectList(_userManager.Users.Where(u=>u.Id == Convert.ToString(id)), "Id", "Email");
+            //ViewData["lstUtil"] = new SelectList(_userManager.Users.Where(u=>u.Id == Convert.ToString(id)), "Id", "Email");
 
             return View("Index", model);
         }
 
         [HttpPost]
-        public IActionResult Index(MessageViewModel model)
+        public async Task<IActionResult> Index(Message model)
         {
+            model.ListUtilisateurs.Clear();
+            if (model.UserId != null)
+            {
+                string util = model.UserId;
+                lstId.Add((await _userManager.FindByIdAsync(util)).Email);
+                model.ListUtilisateurs = lstId;
+
+                ViewData["NoUtilisateur"] = new SelectList(_userManager.Users, "Id", "Email").Prepend(new SelectListItem("", null));
+                ViewData["lstUtil"] = new SelectList(_userManager.Users.Where(u=>!model.ListUtilisateurs.Contains(u.Email)), "Id", "Email").Prepend(new SelectListItem("", null));
+            }
+            
+            /*
             if (ModelState.IsValid)
             {
                 return RedirectToAction("MessageEnvoye", model);
-            } 
-            else if (model.Specific)
-            {
-                int util = Convert.ToInt32(model.Utilisateur.Id);
-                //model.ListUtilisateurs = (TempData["dest"] as List<int>);
-                model.ListUtilisateurs.Add(util);
-                //TempData["dest"] = model.ListUtilisateurs.ToList();
-
-                ViewData["NoUtilisateur"] = new SelectList(_userManager.Users/*.Where(u=>u.Id)*/, "Id", "Email").Prepend(new SelectListItem("", null));
-            } else
-            {
-                model.Specific = false;
-            }
+            } */
 
             return View(model);
         }
 
         [HttpGet]
-        public IActionResult MessageEnvoye(MessageViewModel model)
+        public async Task<IActionResult> MessageEnvoye(Message model)
         {
+            if (!model.AllUtilisateurs)
+                model.ListUtilisateurs = lstId;
+            else
+            {
+                model.ListUtilisateurs.Clear();
+                for (int i = 1; i < _userManager.Users.Count() + 1; i++)
+                {
+                    model.ListUtilisateurs.Add((await _userManager.FindByIdAsync(Convert.ToString(i))).Email);
+                }                
+            }                
+
             return View(model);
         }
     }
