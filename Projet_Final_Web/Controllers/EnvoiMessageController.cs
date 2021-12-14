@@ -46,6 +46,10 @@ namespace Projet_Final_Web.Controllers
             model.Specific = true;
             //ViewData["lstUtil"] = new SelectList(_userManager.Users.Where(u=>u.Id == Convert.ToString(id)), "Id", "Email");
 
+            /* Voir pourquoi pas de validation et pourquoi yen a en bas
+            if (ModelState.IsValid)
+                RedirectToAction("MessageEnvoye", model);
+            */
             return View("Index", model);
         }
 
@@ -60,14 +64,21 @@ namespace Projet_Final_Web.Controllers
                 model.ListUtilisateurs = lstId;
 
                 ViewData["NoUtilisateur"] = new SelectList(_userManager.Users, "Id", "Email").Prepend(new SelectListItem("", null));
-                ViewData["lstUtil"] = new SelectList(_userManager.Users.Where(u=>!model.ListUtilisateurs.Contains(u.Email)), "Id", "Email").Prepend(new SelectListItem("", null));
+                ViewData["lstUtil"] = new SelectList(_userManager.Users.Where(u => !model.ListUtilisateurs.Contains(u.Email)), "Id", "Email").Prepend(new SelectListItem("", null));
             }
-            
-            /*
-            if (ModelState.IsValid)
+            else if (ModelState.IsValid) // Pourquoi validation se fait a tous les reloads??
             {
                 return RedirectToAction("MessageEnvoye", model);
-            } */
+            }
+            else if (!model.AllUtilisateurs && !model.Specific)
+            {
+                lstId.Clear();
+                ViewData["lstUtil"] = new SelectList(_userManager.Users, "Id", "Email").Prepend(new SelectListItem("", null));
+            }
+            else
+            {
+                return RedirectToAction("EnvoiUtil/"+lstId.First());
+            }
 
             return View(model);
         }
@@ -79,7 +90,7 @@ namespace Projet_Final_Web.Controllers
                 model.ListUtilisateurs = lstId;
             else
             {
-                model.ListUtilisateurs.Clear();
+                model.ListUtilisateurs = new List<string>();
                 for (int i = 1; i < _userManager.Users.Count() + 1; i++)
                 {
                     model.ListUtilisateurs.Add((await _userManager.FindByIdAsync(Convert.ToString(i))).Email);

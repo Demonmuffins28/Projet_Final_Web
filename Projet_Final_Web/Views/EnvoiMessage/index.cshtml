@@ -9,19 +9,20 @@
 @if (!Model.Specific)
 {
     <h2>Envoyer un message à un ou plusieurs utilisateurs</h2>
-} else
+}
+else
 {
     <h2>Envoyer un message</h2>
 }
 
-<hr/>
+<hr />
 
-@using (Html.BeginForm("index", "EnvoiMessage", FormMethod.Post, new {id = "frmSaisie"}))
+@using (Html.BeginForm("index", "EnvoiMessage", FormMethod.Post, new { id = "frmSaisie" }))
 {
     @if (!Model.Specific)
-    {    
+    {
         <div class="input-group mb-3">
-            @Html.CheckBoxFor(model => model.AllUtilisateurs, new { @onChange = "this.form.submit()"})
+            @Html.CheckBoxFor(model => model.AllUtilisateurs, new { @onChange = "this.form.submit()" })
             <span style="margin-left: 5px">Envoyer à tous les utilisateurs?</span>
         </div>
     }
@@ -32,36 +33,37 @@
     @if (!Model.Specific)
     {
         <div class="input-group mb-3 @classDestinataire">
-          <div class="input-group-prepend">
-            <span class="input-group-text" id="basic-addon3">Destinataire(s) : </span>
-            <select asp-for="UserId" class="form-control" asp-items="ViewBag.lstUtil" onchange="this.form.submit()"></select>     
-            <input asp-for="ListUtilisateurs" class="form-control" type="hidden"/>
-          </div>
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon3">Destinataire(s) : </span>
+                <select asp-for="UserId" class="form-control" asp-items="ViewBag.lstUtil" onchange="this.form.submit()"></select>
+            </div>
         </div>
     }
+    <input asp-for="ListUtilisateurs" class="form-control" type="hidden" />
+    <input asp-for="Specific" class="form-control" type="hidden" />
 
     <div class="input-group mb-3 @classDestinataire">
         <span>Destinataire(s): </span>
         @if (Model.ListUtilisateurs.Any())
-        {       
+        {
             <span> @String.Join(", ", Model.ListUtilisateurs.ToArray())</span>
         }
     </div>
 
     <div class="input-group mb-3">
-      <div class="input-group-prepend">
-        <span class="input-group-text">Sujet : </span>
-      </div>
+        <div class="input-group-prepend">
+            <span class="input-group-text">Sujet : </span>
+        </div>
         <input asp-for="Sujet" class="form-control" name="Sujet" />
-        <span asp-validation-for="Sujet" class="text-danger"></span>
     </div>
+    <span asp-validation-for="Sujet" class="text-danger"></span>
 
     <div class="input-group">
-      <div class="input-group-prepend">
-        <span class="input-group-text">Contenu : </span>
-      </div>
-      <textarea asp-for="Corps" class="form-control" name="Corps"></textarea>
-       <span asp-validation-for="Corps" class="text-danger"></span>
+        <div class="input-group-prepend">
+            <span class="input-group-text">Contenu : </span>
+        </div>
+        <textarea asp-for="Corps" class="form-control" name="Corps"></textarea>
+        <span asp-validation-for="Corps" class="text-danger"></span>
     </div>
 
     <div class="input-group" style="margin-top: 16px">
