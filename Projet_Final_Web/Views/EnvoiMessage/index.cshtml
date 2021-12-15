@@ -55,8 +55,9 @@ else
             <span class="input-group-text">Sujet : </span>
         </div>
         <input asp-for="Sujet" class="form-control" name="Sujet" />
+        <span asp-validation-for="Sujet" class="text-danger"></span>
     </div>
-    <span asp-validation-for="Sujet" class="text-danger"></span>
+   
 
     <div class="input-group">
         <div class="input-group-prepend">

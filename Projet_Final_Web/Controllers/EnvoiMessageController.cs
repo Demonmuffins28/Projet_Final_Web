@@ -75,7 +75,7 @@ namespace Projet_Final_Web.Controllers
                 lstId.Clear();
                 ViewData["lstUtil"] = new SelectList(_userManager.Users, "Id", "Email").Prepend(new SelectListItem("", null));
             }
-            else
+            else if (model.Specific)
             {
                 return RedirectToAction("EnvoiUtil/"+lstId.First());
             }
