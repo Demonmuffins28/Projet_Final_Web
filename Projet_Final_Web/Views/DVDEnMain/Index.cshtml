@@ -30,7 +30,7 @@
                         </h5>
                         <hr />
                         <div class="text-center justify-content-center row">
-                          @if (Model.utilisateursActuel.TypesUtilisateurID == "S" || Model.utilisateursActuel.TypesUtilisateurID == "A")
+                            @if (Model.utilisateursActuel.TypesUtilisateurID == "S" || Model.utilisateursActuel.TypesUtilisateurID == "A")
                             {
                                 <a href="/Films/Details/@item.NoFilm" class="btn btn-info col-11" role="button">Détail</a>
                                 <a href="/Films/Edit/@item.NoFilm" class="btn btn-primary col-11 my-1" role="button">Modifier</a>
@@ -41,7 +41,7 @@
                                 }
                                 @if (utilisateurAyantDVDEnMain != Model.utilisateursActuel || Model.utilisateursActuel.TypesUtilisateurID == "A")
                                 {
-                                    <a href="#" class="btn btn-secondary col-11" role="button">Message à l'utilisateur</a>
+                                    <a href="/EnvoiMessage/EnvoiUtil/@item.NoUtilisateurMAJ" class="btn btn-secondary col-11" role="button">Message à l'utilisateur</a>
                                 }
                             }
                             else
@@ -55,7 +55,7 @@
                                 else
                                 {
                                     <a href="/Films/Details/@item.NoFilm" class="btn btn-info col-11" role="button">Détail</a>
-                                    <a href="#" class="btn btn-secondary col-11 my-1" role="button">Message à l'utilisateur</a>
+                                    <a href="/EnvoiMessage/EnvoiUtil/@item.NoUtilisateurMAJ" class="btn btn-secondary col-11 my-1" role="button">Message à l'utilisateur</a>
                                     <a href="/Films/Emprunt/@item.NoFilm" class="btn btn-dark col-11" role="button">Emprunter</a>
                                 }
                             }

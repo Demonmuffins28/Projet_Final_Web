@@ -34,8 +34,6 @@
                                         <a class="dropdown-item" asp-area="" asp-controller="DVDEnMain" asp-action="Index" asp-route-id="@UserManager.GetUserId(User)">Mes DVDs</a>
                                     }
                                     <a class="dropdown-item" asp-area="" asp-controller="ListeEmprunts" asp-action="Index">Emprunts des membres</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="#">Something else here</a>
                                 </div>
                             </li>
                             <li class="nav-item">
@@ -44,13 +42,13 @@
                             @if (UserManager.GetUserName(User) == "admin")
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-light" asp-area="" asp-controller="GestionUtilisateur" asp-action="Index">Gestion Utilisateurs</a>
+                                    <a class="nav-link" asp-area="" asp-controller="GestionUtilisateur" asp-action="Index">Gestion Utilisateurs</a>
                                 </li>
                             }
                             else
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-light" asp-area="" asp-controller="Personnalisation" asp-action="Index">Personnalisation de l’environnement</a>
+                                    <a class="nav-link" asp-area="" asp-controller="Personnalisation" asp-action="Index">Personnalisation de l’environnement</a>
                                 </li>
                             }
                         </ul>
