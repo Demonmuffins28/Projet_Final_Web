@@ -19,6 +19,7 @@ namespace Projet_Final_Web.Controllers
         private readonly UserManager<Utilisateurs> _userManager;
         private IWebHostEnvironment _env;
         private static List<string> lstId;
+        private static int? idSpecific;
 
         public EnvoiMessageController(DbContextProjetFinal context, UserManager<Utilisateurs> userManager, IWebHostEnvironment env)
         {
@@ -39,6 +40,7 @@ namespace Projet_Final_Web.Controllers
 
         public async Task<IActionResult> EnvoiUtil(int? id)
         {
+            idSpecific = id;
             Message model = new Message();
             lstId = new List<string>();
             lstId.Add((await _userManager.FindByIdAsync(Convert.ToString(id))).Email);
@@ -50,6 +52,7 @@ namespace Projet_Final_Web.Controllers
             if (ModelState.IsValid)
                 RedirectToAction("MessageEnvoye", model);
             */
+
             return View("Index", model);
         }
 
@@ -68,6 +71,16 @@ namespace Projet_Final_Web.Controllers
             }
             else if (ModelState.IsValid) // Pourquoi validation se fait a tous les reloads??
             {
+                if (!model.AllUtilisateurs)
+                    model.ListUtilisateurs = lstId;
+                else
+                {
+                    model.ListUtilisateurs = new List<string>();
+                    for (int i = 1; i < _userManager.Users.Count() + 1; i++)
+                    {
+                        model.ListUtilisateurs.Add((await _userManager.FindByIdAsync(Convert.ToString(i))).Email);
+                    }
+                }
                 return RedirectToAction("MessageEnvoye", model);
             }
             else if (!model.AllUtilisateurs && !model.Specific)
@@ -77,7 +90,7 @@ namespace Projet_Final_Web.Controllers
             }
             else if (model.Specific)
             {
-                return RedirectToAction("EnvoiUtil/"+lstId.First());
+                return RedirectToAction("EnvoiUtil", new { id = idSpecific });
             }
 
             return View(model);
@@ -85,18 +98,7 @@ namespace Projet_Final_Web.Controllers
 
         [HttpGet]
         public async Task<IActionResult> MessageEnvoye(Message model)
-        {
-            if (!model.AllUtilisateurs)
-                model.ListUtilisateurs = lstId;
-            else
-            {
-                model.ListUtilisateurs = new List<string>();
-                for (int i = 1; i < _userManager.Users.Count() + 1; i++)
-                {
-                    model.ListUtilisateurs.Add((await _userManager.FindByIdAsync(Convert.ToString(i))).Email);
-                }                
-            }                
-
+        {              
             return View(model);
         }
     }
