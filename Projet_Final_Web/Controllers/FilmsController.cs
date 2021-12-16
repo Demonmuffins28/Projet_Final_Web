@@ -33,6 +33,11 @@ namespace Projet_Final_Web.Controllers
             return View(await dbContextProjetFinal.ToListAsync());
         }
 
+        public IActionResult Message(Message model)
+        {
+            return View(model);
+        }
+
         public async Task<IActionResult> Emprunt(int? id)
         {
             if (id == null)
@@ -74,20 +79,20 @@ namespace Projet_Final_Web.Controllers
             var films = await _context.Films.FindAsync(id);
             Utilisateurs utilisateursActuel = await _userManager.GetUserAsync(HttpContext.User);
 
-            string NouTilisateur = utilisateursActuel.TypesUtilisateurID == "S" ? IDUtilisateursSelectionner : utilisateursActuel.Id;
+            string noUtilisateur = utilisateursActuel.TypesUtilisateurID == "S" ? IDUtilisateursSelectionner : utilisateursActuel.Id;
 
-            films.NoUtilisateurMAJ = NouTilisateur;
+            films.NoUtilisateurMAJ = noUtilisateur;
             films.DateMAJ = DateTime.Now;
 
             int NoExemplaire = Convert.ToInt32(films.NoFilm + "01");
 
-            EmpruntsFilms? emprunt = _context.EmpruntsFilms.FirstOrDefault(a => a.NoUtilisateur == NouTilisateur && a.NoExemplaire == NoExemplaire);
+            EmpruntsFilms? emprunt = _context.EmpruntsFilms.FirstOrDefault(a => a.NoUtilisateur == noUtilisateur && a.NoExemplaire == NoExemplaire);
 
             if (emprunt == null)
             {
                 EmpruntsFilms empruntsFilms = new EmpruntsFilms() { 
                     NoExemplaire =NoExemplaire,
-                    NoUtilisateur = NouTilisateur,
+                    NoUtilisateur = noUtilisateur,
                     DateEmprunt = DateTime.Now
                 };
                 _context.Add(empruntsFilms);
@@ -100,6 +105,20 @@ namespace Projet_Final_Web.Controllers
             _context.Update(films);
 
             await _context.SaveChangesAsync();
+
+
+            var ListIdUtilisateur = _context.UtilisateursPreferences.Where(a => a.NoPreference == 4).Select(a => a.NoUtilisateur);
+            var EmailUtilisateurs = _userManager.Users.Where(a => ListIdUtilisateur.Contains(a.Id)).Select(a => a.Email);
+
+            if (EmailUtilisateurs.Count() > 0)
+            {
+                return RedirectToAction("Message", new
+                {
+                    Destinataire = String.Join(", ", EmailUtilisateurs.ToArray()),
+                    Sujet = "Appropriation d'un DVD",
+                    Corps = $"L'utilisateur {(await _userManager.FindByIdAsync(noUtilisateur)).UserName} à emprunter le DVD suivant :  {films.TitreFrancais}"
+                });
+            }
 
             return Redirect(LienRetour);
         }
@@ -205,6 +224,21 @@ namespace Projet_Final_Web.Controllers
                             _context.Add(empruntsFilms);
                         }
                         await _context.SaveChangesAsync();
+
+                        var ListIdUtilisateur = _context.UtilisateursPreferences.Where(a => a.NoPreference == 3).Select(a => a.NoUtilisateur);
+                        var EmailUtilisateurs = _userManager.Users.Where(a => ListIdUtilisateur.Contains(a.Id)).Select(a => a.Email);
+
+                        if (EmailUtilisateurs.Count() > 0)
+                        {
+                            return RedirectToAction("Message", new {
+                                Destinataire = String.Join(", ", EmailUtilisateurs.ToArray()),
+                                Sujet = "Ajout de plusieurs nouveau DVD",
+                                Corps = model.typeUtilisateursConnecter == "S" ?
+                                $"Le super utilisateur {utilisateursActuel.UserName} à ajouté les DVD suivant :  {String.Join(", ", listTitreNonNull.ToArray())} à l'utilisateur {await _userManager.FindByIdAsync(model.IDUtilisateursSelectionner)}"
+                                : $"L'utilisateur {utilisateursActuel.UserName} à ajouté les DVD suivant :  {String.Join(",", listTitreNonNull.ToArray())}"
+                            });
+                        }
+
                         return Redirect(model.LienRetour);
                     }
                 }
@@ -294,6 +328,23 @@ namespace Projet_Final_Web.Controllers
                                 _context.Add(filmsSupplements);
                             }
                             await _context.SaveChangesAsync();
+
+
+                            var ListIdUtilisateur = _context.UtilisateursPreferences.Where(a => a.NoPreference == 3).Select(a => a.NoUtilisateur);
+                            var EmailUtilisateurs = _userManager.Users.Where(a => ListIdUtilisateur.Contains(a.Id)).Select(a => a.Email);
+
+                            if (EmailUtilisateurs.Count() > 0)
+                            {
+                                return RedirectToAction("Message", new
+                                {
+                                    Destinataire = String.Join(", ", EmailUtilisateurs.ToArray()),
+                                    Sujet = "Ajout d'un nouveau DVD",
+                                    Corps = model.typeUtilisateursConnecter == "S" ?
+                                    $"Le super utilisateur {utilisateursActuel.UserName} à ajouté le DVD suivant :  {model.Film.TitreFrancais} à l'utilisateur {await _userManager.FindByIdAsync(model.IDUtilisateursSelectionner)}"
+                                    : $"L'utilisateur {utilisateursActuel.UserName} à ajouté le DVD suivant :  {model.Film.TitreFrancais}"
+                                });
+                            }
+
                             return Redirect(model.LienRetour);
                         }
                     }
@@ -626,6 +677,20 @@ namespace Projet_Final_Web.Controllers
             }
 
             await _context.SaveChangesAsync();
+
+            Utilisateurs utilisateursActuel = await _userManager.GetUserAsync(HttpContext.User);
+            var ListIdUtilisateur = _context.UtilisateursPreferences.Where(a => a.NoPreference == 5).Select(a => a.NoUtilisateur);
+            var EmailUtilisateurs = _userManager.Users.Where(a => ListIdUtilisateur.Contains(a.Id)).Select(a => a.Email);
+
+            if (EmailUtilisateurs.Count() > 0)
+            {
+                return RedirectToAction("Message", new
+                {
+                    Destinataire = String.Join(", ", EmailUtilisateurs.ToArray()),
+                    Sujet = "Retrait d'un DVD",
+                    Corps =  $"L'utilisateur {utilisateursActuel.UserName} à retirer le DVD suivant :  {films.TitreFrancais}"
+                });
+            }
 
             return Redirect(LienRetour);
         }
